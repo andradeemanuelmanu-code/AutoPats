@@ -46,11 +46,13 @@ const OtimizacaoRotas = () => {
           }
 
           const selected = customers.filter(c => selectedCustomerIds.has(c.id));
-          
+          const idMap = new Map(selected.map((customer, index) => [index, customer.id]));
+          const customerMap = new Map(selected.map(customer => [customer.id, customer]));
+
           // ETAPA 1: Obter a ordem otimizada do endpoint de otimização
           const optimizationRequest = {
-            jobs: selected.map(customer => ({
-              id: customer.id,
+            jobs: selected.map((customer, index) => ({
+              id: index, // A API requer um ID de número inteiro
               location: [customer.lng, customer.lat]
             })),
             vehicles: [{
@@ -61,18 +63,23 @@ const OtimizacaoRotas = () => {
             }]
           };
 
+          const headers = {
+            'Authorization': apiKey,
+            'Content-Type': 'application/json; charset=utf-8'
+          };
+
           const optimizationResponse = await axios.post(
             'https://api.openrouteservice.org/v2/optimization',
             optimizationRequest,
-            { headers: { 'Authorization': apiKey } }
+            { headers }
           );
 
           const orderedSteps = optimizationResponse.data.routes[0].steps;
           const jobSteps = orderedSteps.filter((step: any) => step.type === 'job');
           
-          const orderedCustomerIds = jobSteps.map((step: any) => step.id);
+          const orderedCustomerIds = jobSteps.map((step: any) => idMap.get(step.id));
           const sequencedCustomers: OrderedCustomer[] = orderedCustomerIds.map((id: string, index: number) => {
-            const customer = customers.find(c => c.id === id)!;
+            const customer = customerMap.get(id)!;
             return { ...customer, sequence: index + 1 };
           });
           setOrderedCustomers(sequencedCustomers);
@@ -87,7 +94,7 @@ const OtimizacaoRotas = () => {
           const directionsResponse = await axios.post(
             'https://api.openrouteservice.org/v2/directions/driving-car/geojson',
             { coordinates: orderedCoordinates },
-            { headers: { 'Authorization': apiKey } }
+            { headers }
           );
 
           // ETAPA 3: Processar a resposta das direções para dividir a rota
@@ -95,18 +102,12 @@ const OtimizacaoRotas = () => {
           const segments = feature.properties.segments;
           const allCoordinates = feature.geometry.coordinates.map((c: number[]) => ({ lat: c[1], lng: c[0] }));
 
-          // O último segmento é a viagem de volta
           const lastSegmentIndex = segments.length - 1;
-          
           let returnTripStartIndexInCoords = 0;
           for (let i = 0; i < lastSegmentIndex; i++) {
-            // A propriedade way_points nos diz os índices no array de coordenadas
             returnTripStartIndexInCoords = segments[i].way_points[1];
           }
           
-          const lastCustomerInRoute = sequencedCustomers[sequencedCustomers.length - 1];
-          const lastCustomerCoords = { lat: lastCustomerInRoute.lat, lng: lastCustomerInRoute.lng };
-
           const outboundPath = allCoordinates.slice(0, returnTripStartIndexInCoords + 1);
           const returnPath = allCoordinates.slice(returnTripStartIndexInCoords);
 
