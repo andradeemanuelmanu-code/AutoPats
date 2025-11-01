@@ -1,10 +1,10 @@
 import { useState } from "react";
-import axios from "axios";
 import { useAppData } from "@/context/AppDataContext";
 import { CustomerSelectionSidebar } from "@/components/otimizacao/CustomerSelectionSidebar";
 import { RouteMap } from "@/components/otimizacao/RouteMap";
 import { showError, showLoading, dismissToast, showSuccess } from "@/utils/toast";
 import { Customer } from "@/data/customers";
+import { orsApi } from "@/lib/ors-api";
 
 type Coordinates = { lat: number; lng: number };
 type OrderedCustomer = Customer & { sequence: number };
@@ -49,12 +49,6 @@ const OtimizacaoRotas = () => {
           const idMap = new Map(selected.map((customer, index) => [index, customer.id]));
           const customerMap = new Map(selected.map(customer => [customer.id, customer]));
 
-          const headers = {
-            'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
-            'Authorization': apiKey,
-            'Content-Type': 'application/json; charset=utf-8'
-          };
-
           // ETAPA 1: Obter a ordem otimizada do endpoint de otimização
           const optimizationRequest = {
             jobs: selected.map((customer, index) => ({
@@ -69,10 +63,9 @@ const OtimizacaoRotas = () => {
             }]
           };
 
-          const optimizationResponse = await axios.post(
-            '/ors-api/v2/optimization',
-            optimizationRequest,
-            { headers }
+          const optimizationResponse = await orsApi.post(
+            '/v2/optimization',
+            optimizationRequest
           );
 
           const orderedSteps = optimizationResponse.data.routes[0].steps;
@@ -92,10 +85,9 @@ const OtimizacaoRotas = () => {
             [userCoords.lng, userCoords.lat]
           ];
 
-          const directionsResponse = await axios.post(
-            '/ors-api/v2/directions/driving-car/geojson',
-            { coordinates: orderedCoordinates },
-            { headers }
+          const directionsResponse = await orsApi.post(
+            '/v2/directions/driving-car/geojson',
+            { coordinates: orderedCoordinates }
           );
 
           // ETAPA 3: Processar a resposta das direções para dividir a rota
