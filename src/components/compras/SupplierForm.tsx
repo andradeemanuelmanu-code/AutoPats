@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,10 +20,9 @@ const formSchema = z.object({
 interface SupplierFormProps {
   supplier: Supplier | null;
   onSubmit: (data: Omit<Supplier, 'id'>) => void;
-  onCancel: () => void;
 }
 
-export const SupplierForm = ({ supplier, onSubmit, onCancel }: SupplierFormProps) => {
+export const SupplierForm = ({ supplier, onSubmit }: SupplierFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,19 +39,23 @@ export const SupplierForm = ({ supplier, onSubmit, onCancel }: SupplierFormProps
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField control={form.control} name="name" render={({ field }) => (
-          <FormItem><FormLabel>Nome</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="cnpj" render={({ field }) => (
-          <FormItem><FormLabel>CNPJ</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="email" render={({ field }) => (
-          <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="phone" render={({ field }) => (
-          <FormItem><FormLabel>Telefone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
+      <form id="supplier-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-4">
+        <div className="grid grid-cols-2 gap-4">
+          <FormField control={form.control} name="name" render={({ field }) => (
+            <FormItem><FormLabel>Nome</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="cnpj" render={({ field }) => (
+            <FormItem><FormLabel>CNPJ</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField control={form.control} name="email" render={({ field }) => (
+            <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="phone" render={({ field }) => (
+            <FormItem><FormLabel>Telefone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        </div>
         <FormField control={form.control} name="address" render={({ field }) => (
           <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -74,10 +76,6 @@ export const SupplierForm = ({ supplier, onSubmit, onCancel }: SupplierFormProps
             <FormMessage />
           </FormItem>
         )} />
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit">Salvar</Button>
-        </div>
       </form>
     </Form>
   );

@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { mockSuppliers, Supplier } from "@/data/suppliers";
 import { SupplierCard } from "@/components/compras/SupplierCard";
 import { SupplierForm } from "@/components/compras/SupplierForm";
@@ -83,11 +84,17 @@ const Fornecedores = () => {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[625px] flex flex-col max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>{editingSupplier ? "Editar Fornecedor" : "Novo Fornecedor"}</DialogTitle>
           </DialogHeader>
-          <SupplierForm supplier={editingSupplier} onSubmit={handleSaveSupplier} onCancel={handleCloseModal} />
+          <ScrollArea className="flex-1">
+            <SupplierForm supplier={editingSupplier} onSubmit={handleSaveSupplier} />
+          </ScrollArea>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleCloseModal}>Cancelar</Button>
+            <Button type="submit" form="supplier-form">Salvar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
