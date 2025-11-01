@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Menu, Car, Search, Bell, CircleUser } from "lucide-react";
+import { Menu, Car, Bell, CircleUser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
 
 const navItems = [
     { to: "/", label: "Dashboard" },
@@ -46,18 +45,7 @@ export const Header = () => {
         </SheetContent>
       </Sheet>
 
-      <div className="w-full flex-1">
-        <form>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar produtos..."
-              className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-            />
-          </div>
-        </form>
-      </div>
+      <div className="w-full flex-1" />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
