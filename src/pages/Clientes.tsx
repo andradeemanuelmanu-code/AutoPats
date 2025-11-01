@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { mockCustomers, Customer } from "@/data/customers";
 import { CustomerCard } from "@/components/vendas/CustomerCard";
 import { CustomerForm } from "@/components/vendas/CustomerForm";
@@ -83,11 +84,17 @@ const Clientes = () => {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] flex flex-col max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>{editingCustomer ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
           </DialogHeader>
-          <CustomerForm customer={editingCustomer} onSubmit={handleSaveCustomer} onCancel={handleCloseModal} />
+          <ScrollArea className="flex-1">
+            <CustomerForm customer={editingCustomer} onSubmit={handleSaveCustomer} onCancel={handleCloseModal} />
+          </ScrollArea>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleCloseModal}>Cancelar</Button>
+            <Button type="submit" form="customer-form">Salvar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

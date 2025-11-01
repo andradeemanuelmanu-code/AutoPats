@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Customer } from "@/data/customers";
@@ -22,7 +21,7 @@ interface CustomerFormProps {
   onCancel: () => void;
 }
 
-export const CustomerForm = ({ customer, onSubmit, onCancel }: CustomerFormProps) => {
+export const CustomerForm = ({ customer, onSubmit }: CustomerFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,7 +37,7 @@ export const CustomerForm = ({ customer, onSubmit, onCancel }: CustomerFormProps
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form id="customer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-4">
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem><FormLabel>Nome / Razão Social</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -61,10 +60,6 @@ export const CustomerForm = ({ customer, onSubmit, onCancel }: CustomerFormProps
           <FormField control={form.control} name="lng" render={({ field }) => (
             <FormItem><FormLabel>Longitude</FormLabel><FormControl><Input type="number" step="any" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
-        </div>
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit">Salvar</Button>
         </div>
       </form>
     </Form>
