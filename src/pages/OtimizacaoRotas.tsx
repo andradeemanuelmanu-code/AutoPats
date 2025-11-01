@@ -51,8 +51,8 @@ const OtimizacaoRotas = () => {
 
           const headers = {
             'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
-            'Content-Type': 'application/json',
-            'Authorization': apiKey
+            'Authorization': apiKey,
+            'Content-Type': 'application/json; charset=utf-8'
           };
 
           // ETAPA 1: Obter a ordem otimizada do endpoint de otimização
@@ -119,7 +119,14 @@ const OtimizacaoRotas = () => {
           showSuccess("Rota gerada com sucesso!");
         } catch (error) {
           console.error("Erro ao gerar rota:", error);
-          const errorMessage = error.response?.data?.error?.message || error.message || "Falha ao calcular a rota.";
+          let errorMessage = "Falha ao calcular a rota.";
+          if (error.message === "Network Error") {
+            errorMessage = "Erro de Rede: Não foi possível conectar à API. Verifique sua conexão e se a chave da API (VITE_ORS_API_KEY) está correta.";
+          } else if (error.response) {
+            errorMessage = `Erro da API (${error.response.status}): ${error.response.data?.error?.message || 'Resposta inválida'}`;
+          } else {
+            errorMessage = error.message;
+          }
           showError(errorMessage);
           dismissToast(processingToastId);
         } finally {
