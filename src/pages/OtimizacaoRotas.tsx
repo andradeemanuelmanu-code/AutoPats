@@ -81,7 +81,7 @@ const OtimizacaoRotas = () => {
           ];
 
           const headers = { 'Authorization': apiKey, 'Content-Type': 'application/json' };
-          const body = { coordinates, extras: ["tollways"] };
+          const body = { coordinates, extra_info: ["tollways"] };
 
           const directionsResponse = await axios.post('/ors-api/v2/directions/driving-car/geojson', body, { headers });
 
