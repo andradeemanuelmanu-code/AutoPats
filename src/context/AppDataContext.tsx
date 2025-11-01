@@ -23,6 +23,7 @@ interface AppDataContextType {
   addSalesOrder: (order: Omit<SalesOrder, 'id' | 'number'>) => void;
   addPurchaseOrder: (order: Omit<PurchaseOrder, 'id' | 'number'>) => void;
   cancelSalesOrder: (orderId: string) => void;
+  cancelPurchaseOrder: (orderId: string) => void;
   markNotificationsAsRead: () => void;
 }
 
@@ -108,7 +109,6 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     );
 
     if (orderToCancel) {
-      // Return stock
       setProducts(prevProducts => {
         const updatedProducts = [...prevProducts];
         (orderToCancel as SalesOrder).items.forEach(item => {
@@ -123,6 +123,38 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const cancelPurchaseOrder = (orderId: string) => {
+    let orderToCancel: PurchaseOrder | undefined;
+    let originalStatus: PurchaseOrder['status'] | undefined;
+
+    setPurchaseOrders(prevOrders =>
+      prevOrders.map(order => {
+        if (order.id === orderId && order.status !== 'Cancelado') {
+          originalStatus = order.status;
+          orderToCancel = { ...order, status: 'Cancelado' };
+          return orderToCancel;
+        }
+        return order;
+      })
+    );
+
+    if (orderToCancel && originalStatus === 'Recebido') {
+      setProducts(prevProducts => {
+        const updatedProducts = [...prevProducts];
+        orderToCancel!.items.forEach(item => {
+          const productIndex = updatedProducts.findIndex(p => p.id === item.productId);
+          if (productIndex !== -1) {
+            updatedProducts[productIndex].stock -= item.quantity;
+          }
+        });
+        return updatedProducts;
+      });
+      addNotification(`Pedido de compra ${orderToCancel.number} cancelado. Estoque revertido.`, '/compras/pedidos');
+    } else if (orderToCancel) {
+      addNotification(`Pedido de compra ${orderToCancel.number} foi cancelado.`, '/compras/pedidos');
+    }
+  };
+
   const value = useMemo(() => ({
     products,
     salesOrders,
@@ -133,6 +165,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     addSalesOrder,
     addPurchaseOrder,
     cancelSalesOrder,
+    cancelPurchaseOrder,
     markNotificationsAsRead,
   }), [products, salesOrders, customers, suppliers, purchaseOrders, notifications]);
 

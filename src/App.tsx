@@ -20,6 +20,7 @@ import { Layout } from "./components/Layout";
 import HistoricoCliente from "./pages/HistoricoCliente";
 import { AppDataProvider } from "./context/AppDataContext";
 import DetalhesPedidoVenda from "./pages/DetalhesPedidoVenda";
+import DetalhesPedidoCompra from "./pages/DetalhesPedidoCompra";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/compras/fornecedores" element={<Fornecedores />} />
               <Route path="/compras/pedidos" element={<PedidosCompra />} />
               <Route path="/compras/pedidos/novo" element={<NovoPedidoCompra />} />
+              <Route path="/compras/pedidos/:orderId" element={<DetalhesPedidoCompra />} />
               <Route path="/vendas/clientes" element={<Clientes />} />
               <Route path="/vendas/clientes/:customerId" element={<HistoricoCliente />} />
               <Route path="/vendas/pedidos" element={<PedidosVenda />} />
