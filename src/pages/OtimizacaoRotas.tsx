@@ -1,64 +1,64 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { useAppData } from "@/context/AppDataContext";
 import { CustomerSelectionSidebar } from "@/components/otimizacao/CustomerSelectionSidebar";
 import { RouteMap } from "@/components/otimizacao/RouteMap";
 import { showError, showLoading, dismissToast, showSuccess } from "@/utils/toast";
+import { Customer } from "@/data/customers";
 
 type Coordinates = { lat: number; lng: number };
+type OrderedCustomer = Customer & { sequence: number };
 
 const OtimizacaoRotas = () => {
   const { customers } = useAppData();
   const [selectedCustomerIds, setSelectedCustomerIds] = useState<Set<string>>(new Set());
   const [isGenerating, setIsGenerating] = useState(false);
-  const [route, setRoute] = useState<Coordinates[] | null>(null);
+  const [outboundRoute, setOutboundRoute] = useState<Coordinates[] | null>(null);
+  const [returnRoute, setReturnRoute] = useState<Coordinates[] | null>(null);
+  const [orderedCustomers, setOrderedCustomers] = useState<OrderedCustomer[] | null>(null);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
 
   const handleCustomerToggle = (customerId: string) => {
     setSelectedCustomerIds(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(customerId)) {
-        newSet.delete(customerId);
-      } else {
-        newSet.add(customerId);
-      }
+      if (newSet.has(customerId)) newSet.delete(customerId);
+      else newSet.add(customerId);
       return newSet;
     });
   };
 
-  const getOptimizedRoute = async (start: Coordinates, points: Coordinates[]) => {
-    const apiKey = import.meta.env.VITE_ORS_API_KEY;
-    if (!apiKey || apiKey.includes("COLE_SUA_CHAVE")) {
-      showError("Chave da API do OpenRouteService não configurada.");
-      throw new Error("API key is missing.");
+  const processRouteResponse = (response: any, startCoords: Coordinates, selectedCustomers: Customer[]) => {
+    const feature = response.data.features[0];
+    const segments = feature.properties.segments;
+    const waypoints = feature.properties.summary.way_points; // [start_index, end_index, permutation...]
+
+    // 1. Ordenar os clientes
+    const customerOrder = waypoints.slice(2).map((waypointIndex: number) => selectedCustomers[waypointIndex]);
+    const sequencedCustomers: OrderedCustomer[] = customerOrder.map((customer, index) => ({
+      ...customer,
+      sequence: index + 1,
+    }));
+    setOrderedCustomers(sequencedCustomers);
+
+    // 2. Separar rotas de ida e volta
+    const allCoordinates = feature.geometry.coordinates.map((c: number[]) => ({ lat: c[1], lng: c[0] }));
+    
+    let lastCustomerCoordIndex = 0;
+    for (let i = 0; i < segments.length - 1; i++) {
+      lastCustomerCoordIndex += segments[i].steps.length;
     }
+    
+    const finalSegment = segments[segments.length - 1];
+    const finalSegmentCoords = finalSegment.steps.flatMap((step: any) => step.way_points.map((wpIndex: number) => allCoordinates[wpIndex]));
+    
+    const lastCustomerInRoute = sequencedCustomers[sequencedCustomers.length - 1];
+    const lastCustomerCoords = { lat: lastCustomerInRoute.lat, lng: lastCustomerInRoute.lng };
 
-    const coordinates = [
-      [start.lng, start.lat],
-      ...points.map(p => [p.lng, p.lat])
-    ];
+    const outboundPath = allCoordinates.slice(0, finalSegmentCoords[0]);
+    const returnPath = allCoordinates.slice(finalSegmentCoords[0]);
 
-    try {
-      const response = await axios.post(
-        'https://api.openrouteservice.org/v2/directions/driving-car/geojson',
-        { coordinates },
-        {
-          headers: {
-            'Authorization': apiKey,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      
-      // A API retorna [longitude, latitude], então precisamos inverter para o Leaflet que espera [latitude, longitude]
-      const routeCoordinates = response.data.features[0].geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
-      return routeCoordinates;
-
-    } catch (error) {
-      console.error("Erro ao buscar rota do OpenRouteService:", error);
-      showError("Falha ao calcular a rota. Verifique a chave da API e a conexão.");
-      throw error;
-    }
+    setOutboundRoute([startCoords, ...outboundPath, lastCustomerCoords]);
+    setReturnRoute([lastCustomerCoords, ...returnPath, startCoords]);
   };
 
   const handleGenerateRoute = () => {
@@ -68,25 +68,30 @@ const OtimizacaoRotas = () => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         dismissToast(toastId);
-        const userCoords = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
+        const userCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
         setUserLocation(userCoords);
         
         const processingToastId = showLoading("Calculando a rota otimizada...");
         
         try {
-          const selectedCustomers = customers.filter(c => selectedCustomerIds.has(c.id));
-          const customerCoords = selectedCustomers.map(c => ({ lat: c.lat, lng: c.lng }));
+          const selected = customers.filter(c => selectedCustomerIds.has(c.id));
+          const customerCoords = selected.map(c => ({ lat: c.lat, lng: c.lng }));
           
-          const calculatedRoute = await getOptimizedRoute(userCoords, customerCoords);
+          const apiKey = import.meta.env.VITE_ORS_API_KEY;
+          if (!apiKey || apiKey.includes("COLE_SUA_CHAVE")) {
+            throw new Error("Chave da API do OpenRouteService não configurada.");
+          }
+
+          const coordinates = [[userCoords.lng, userCoords.lat], ...customerCoords.map(p => [p.lng, p.lat])];
+          const response = await axios.post('https://api.openrouteservice.org/v2/directions/driving-car/geojson', { coordinates }, { headers: { 'Authorization': apiKey } });
+
+          processRouteResponse(response, userCoords, selected);
           
-          // Adiciona o ponto inicial e final para fechar o ciclo
-          setRoute([userCoords, ...calculatedRoute, userCoords]);
           dismissToast(processingToastId);
           showSuccess("Rota gerada com sucesso!");
         } catch (error) {
+          console.error("Erro ao gerar rota:", error);
+          showError(error.message || "Falha ao calcular a rota.");
           dismissToast(processingToastId);
         } finally {
           setIsGenerating(false);
@@ -94,17 +99,12 @@ const OtimizacaoRotas = () => {
       },
       (error) => {
         dismissToast(toastId);
-        showError("Não foi possível obter sua localização. Verifique as permissões do navegador.");
-        console.error("Geolocation error:", error);
+        showError("Não foi possível obter sua localização.");
         setIsGenerating(false);
       },
       { enableHighAccuracy: true }
     );
   };
-
-  const locationsToDisplay = useMemo(() => {
-    return customers.filter(c => selectedCustomerIds.has(c.id));
-  }, [customers, selectedCustomerIds]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[350px_1fr] h-[calc(100vh-60px)]">
@@ -117,8 +117,9 @@ const OtimizacaoRotas = () => {
       />
       <div className="w-full h-full">
         <RouteMap
-          locations={locationsToDisplay}
-          route={route}
+          orderedCustomers={orderedCustomers}
+          outboundRoute={outboundRoute}
+          returnRoute={returnRoute}
           userLocation={userLocation}
         />
       </div>
