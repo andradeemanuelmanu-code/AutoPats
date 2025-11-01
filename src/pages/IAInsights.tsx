@@ -22,20 +22,25 @@ const IAInsights = () => {
       switch (type) {
         case 'demand':
           setDemandInsight(
-            'Analisamos os dados de vendas dos últimos 6 meses e identificamos um padrão de crescimento consistente de 5% ao mês para **"Vela de Ignição Laser Iridium"**. Além disso, nossos modelos sazonais indicam um aumento adicional de 10% neste período do ano, historicamente ligado à preparação para viagens de férias. A combinação desses fatores resulta em uma previsão de aumento de **15% na demanda** para o próximo mês.' +
-            '\n\n**Recomendação Estratégica:** Considerando o estoque atual de 150 unidades e o tempo de entrega de 15 dias do fornecedor principal, recomendamos um pedido de compra de **50 unidades** para manter o estoque de segurança e atender à demanda projetada sem risco de ruptura.'
+            `Analisamos os dados de vendas dos últimos 6 meses e identificamos um padrão de crescimento consistente de 5% ao mês para **"Vela de Ignição Laser Iridium"**. Além disso, nossos modelos sazonais indicam um aumento adicional de 10% neste período do ano, historicamente ligado à preparação para viagens de férias. A combinação desses fatores resulta em uma previsão de aumento de **15% na demanda** para o próximo mês.
+
+**Recomendação Estratégica:** Considerando o estoque atual de 150 unidades e o tempo de entrega de 15 dias do fornecedor principal, recomendamos um pedido de compra de **50 unidades** para manter o estoque de segurança e atender à demanda projetada sem risco de ruptura.`
           );
           break;
         case 'crossSell':
           setCrossSellInsight(
-            'Nossa análise de **1.245 transações** revelou que **68%** dos clientes que adquiriram **"Pastilha de Freio Dianteira"** também compraram **"Filtro de Óleo do Motor"** na mesma transação ou em até 30 dias. Este é o par de produtos com a maior correlação de compra em seu catálogo.' +
-            '\n\n**Recomendação de Ação:** Implementar uma campanha de **"Compre Junto"** no ponto de venda, oferecendo um desconto de 5% no filtro de óleo na compra da pastilha de freio. Estimamos que essa ação pode aumentar o ticket médio em até **R$ 12,50** por transação elegível e impulsionar as vendas de filtros em 25%.'
+            `Nossa análise de **1.245 transações** revelou que **68%** dos clientes que adquiriram **"Pastilha de Freio Dianteira"** também compraram **"Filtro de Óleo do Motor"** na mesma transação ou em até 30 dias. Este é o par de produtos com a maior correlação de compra em seu catálogo.
+
+**Recomendação de Ação:** Implementar uma campanha de **"Compre Junto"** no ponto de venda, oferecendo um desconto de 5% no filtro de óleo na compra da pastilha de freio. Estimamos que essa ação pode aumentar o ticket médio em até **R$ 12,50** por transação elegível e impulsionar as vendas de filtros em 25%.`
           );
           break;
         case 'supplier':
           setSupplierInsight(
-            'Identificamos que o fornecedor **"Fornecedora Minas Parts"**, cujo status é **"Inativo"**, é o fornecedor exclusivo de 2 produtos de alta criticidade: "Amortecedor Traseiro" e "Kit Correia Alternador". O estoque atual desses itens (12 e 8 unidades, respectivamente) representa uma autonomia de apenas **2 semanas** com base na média de vendas.' +
-            '\n\n**Recomendação de Risco:**\n**Ação Imediata:** Contatar os fornecedores secundários "Distribuidora de Peças São Paulo" e "Autopeças Rio" para verificar a disponibilidade e negociar preços para esses itens. \n**Ação Preventiva:** Revisar e diversificar o portfólio de fornecedores para todos os produtos de "Curva A" para mitigar riscos futuros na cadeia de suprimentos.'
+            `Identificamos que o fornecedor **"Fornecedora Minas Parts"**, cujo status é **"Inativo"**, é o fornecedor exclusivo de 2 produtos de alta criticidade: "Amortecedor Traseiro" e "Kit Correia Alternador". O estoque atual desses itens (12 e 8 unidades, respectivamente) representa uma autonomia de apenas **2 semanas** com base na média de vendas.
+
+**Recomendação de Risco:**
+**Ação Imediata:** Contatar os fornecedores secundários "Distribuidora de Peças São Paulo" e "Autopeças Rio" para verificar a disponibilidade e negociar preços para esses itens. 
+**Ação Preventiva:** Revisar e diversificar o portfóglio de fornecedores para todos os produtos de "Curva A" para mitigar riscos futuros na cadeia de suprimentos.`
           );
           break;
       }
@@ -77,7 +82,7 @@ const IAInsights = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-primary" />
-          <h1 className="text-lg font-semibold text-foreground">IA Insights</h1>
+          <h1 className="text-lg font-semibold md:text-2xl text-foreground">IA Insights</h1>
         </div>
       </div>
       <div className="grid gap-6 mt-4">
