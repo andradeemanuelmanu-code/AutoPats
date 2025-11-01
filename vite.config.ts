@@ -7,6 +7,13 @@ export default defineConfig(() => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/ors-api': {
+        target: 'https://api.openrouteservice.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ors-api/, ''),
+      },
+    },
   },
   plugins: [dyadComponentTagger(), react()],
   resolve: {

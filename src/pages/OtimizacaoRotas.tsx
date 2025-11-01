@@ -70,7 +70,7 @@ const OtimizacaoRotas = () => {
           };
 
           const optimizationResponse = await axios.post(
-            'https://api.openrouteservice.org/v2/optimization',
+            '/ors-api/v2/optimization',
             optimizationRequest,
             { headers }
           );
@@ -93,7 +93,7 @@ const OtimizacaoRotas = () => {
           ];
 
           const directionsResponse = await axios.post(
-            'https://api.openrouteservice.org/v2/directions/driving-car/geojson',
+            '/ors-api/v2/directions/driving-car/geojson',
             { coordinates: orderedCoordinates },
             { headers }
           );
