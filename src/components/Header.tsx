@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Menu, Car, Bell, CircleUser } from "lucide-react";
+import { Menu, Wrench, Bell, CircleUser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -37,9 +37,9 @@ export const Header = () => {
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col bg-card">
           <nav className="grid gap-2 text-lg font-medium">
-            <Link to="/" className="flex items-center gap-2 text-lg font-semibold mb-4">
-              <Car className="h-6 w-6 text-primary" />
-              <span className="text-foreground">Autoparts</span>
+            <Link to="/" className="flex items-center gap-3 text-lg font-semibold mb-4 px-2.5">
+              <Wrench className="h-7 w-7 text-primary" />
+              <span className="text-xl text-foreground">Autoparts</span>
             </Link>
             {navItems.map(item => (
                 <Link key={item.label} to={item.to} className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground">

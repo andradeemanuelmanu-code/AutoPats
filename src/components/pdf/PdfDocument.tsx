@@ -9,12 +9,12 @@ import { InventoryValueCard } from "@/components/relatorios/InventoryValueCard";
 import { ProductParetoChart } from "@/components/relatorios/ProductParetoChart";
 import { TopCustomersChart } from "@/components/relatorios/TopCustomersChart";
 import { PurchasesBySupplierChart } from "@/components/relatorios/PurchasesBySupplierChart";
-import { DollarSign, Activity, Car } from "lucide-react";
+import { DollarSign, Activity, Wrench } from "lucide-react";
 
 const PdfHeader = () => (
   <header className="flex items-center justify-between pb-4 border-b mb-6">
     <div className="flex items-center gap-3 font-semibold">
-      <Car className="h-8 w-8 text-primary" />
+      <Wrench className="h-8 w-8 text-primary" />
       <span className="text-2xl">Relatório Geral - Autoparts</span>
     </div>
     <div className="text-right text-sm">

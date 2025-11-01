@@ -7,7 +7,7 @@ import {
   Map,
   BarChart3,
   Settings,
-  Car,
+  Wrench,
   Users,
   Truck,
   Sparkles,
@@ -67,10 +67,10 @@ export const Sidebar = () => {
   return (
     <div className="hidden border-r bg-card md:block">
       <div className="flex h-full max-h-screen flex-col">
-        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-          <NavLink to="/" className="flex items-center gap-2 font-semibold">
-            <Car className="h-6 w-6 text-primary" />
-            <span className="">Autoparts</span>
+        <div className="flex h-16 items-center border-b px-4 lg:h-[64px] lg:px-6">
+          <NavLink to="/" className="flex items-center gap-3 font-semibold">
+            <Wrench className="h-7 w-7 text-primary" />
+            <span className="text-xl">Autoparts</span>
           </NavLink>
         </div>
         <div className="flex flex-1 flex-col justify-between py-4">
