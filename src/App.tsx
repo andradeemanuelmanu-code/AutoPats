@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Estoque from "./pages/Estoque";
 import { Layout } from "./components/Layout";
 
 const queryClient = new QueryClient();
@@ -18,6 +19,7 @@ const App = () => (
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Index />} />
+            <Route path="/estoque" element={<Estoque />} />
             {/* Adicione outras rotas que usam o layout aqui */}
           </Route>
           {/* Rotas sem o layout principal (ex: login) podem ir aqui */}
