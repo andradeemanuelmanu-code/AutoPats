@@ -49,10 +49,16 @@ const OtimizacaoRotas = () => {
           const idMap = new Map(selected.map((customer, index) => [index, customer.id]));
           const customerMap = new Map(selected.map(customer => [customer.id, customer]));
 
+          const headers = {
+            'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+            'Content-Type': 'application/json',
+            'Authorization': apiKey
+          };
+
           // ETAPA 1: Obter a ordem otimizada do endpoint de otimização
           const optimizationRequest = {
             jobs: selected.map((customer, index) => ({
-              id: index, // A API requer um ID de número inteiro
+              id: index,
               location: [customer.lng, customer.lat]
             })),
             vehicles: [{
@@ -61,11 +67,6 @@ const OtimizacaoRotas = () => {
               start: [userCoords.lng, userCoords.lat],
               end: [userCoords.lng, userCoords.lat]
             }]
-          };
-
-          const headers = {
-            'Authorization': apiKey,
-            'Content-Type': 'application/json; charset=utf-8'
           };
 
           const optimizationResponse = await axios.post(
