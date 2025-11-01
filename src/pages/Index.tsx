@@ -1,11 +1,23 @@
+import { Link } from "react-router-dom";
+import { DollarSign, Package, Activity, BarChart, PieChart, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/KpiCard";
-import { DollarSign, Package, Users, Activity } from "lucide-react";
+import { StockAlertsCard } from "@/components/dashboard/StockAlertsCard";
+import { TopProductsCard } from "@/components/dashboard/TopProductsCard";
+import { MarginChartCard } from "@/components/dashboard/MarginChartCard";
+import { DashboardSalesByCategoryChart } from "@/components/dashboard/DashboardSalesByCategoryChart";
+import { StockMovementChart } from "@/components/dashboard/StockMovementChart";
 
 const Index = () => {
   return (
     <>
-      <div className="flex items-center">
+      <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground">Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">Este Mês</Button>
+          <Button variant="ghost" size="sm">Este Ano</Button>
+        </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
         <KpiCard
@@ -16,37 +28,38 @@ const Index = () => {
           Icon={DollarSign}
         />
         <KpiCard
-          title="Vendas"
-          value="+12.234"
-          change="+19% do último mês"
-          changeType="positive"
-          Icon={Users}
-        />
-        <KpiCard
-          title="Novos Pedidos"
-          value="+2.350"
-          change="+180.1% do último mês"
-          changeType="positive"
-          Icon={Package}
-        />
-        <KpiCard
           title="Giro de Estoque"
           value="573"
           change="-2.4% da última hora"
           changeType="negative"
           Icon={Activity}
         />
+        <StockAlertsCard />
+        <MarginChartCard />
       </div>
-      <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm bg-card">
-        <div className="flex flex-col items-center gap-1 text-center p-8">
-          <h3 className="text-2xl font-bold tracking-tight text-foreground">
-            Área para gráficos e relatórios
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Componentes de visualização de dados serão adicionados aqui.
-          </p>
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-5">
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Vendas por Categoria</CardTitle>
+            <CardDescription>Faturamento por categoria de produto este mês.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DashboardSalesByCategoryChart />
+          </CardContent>
+        </Card>
+        <div className="lg:col-span-2">
+          <TopProductsCard />
         </div>
       </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Movimentação de Estoque</CardTitle>
+          <CardDescription>Entradas e saídas de unidades de produtos.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <StockMovementChart />
+        </CardContent>
+      </Card>
     </>
   );
 };

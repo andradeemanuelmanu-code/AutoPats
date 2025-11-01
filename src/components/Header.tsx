@@ -1,14 +1,24 @@
 import { Link } from "react-router-dom";
-import { Menu, Car, Search } from "lucide-react";
+import { Menu, Car, Search, Bell, CircleUser } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 
 const navItems = [
     { to: "/", label: "Dashboard" },
     { to: "/estoque", label: "Estoque" },
-    { to: "/vendas", label: "Vendas" },
+    { to: "/vendas/pedidos", label: "Vendas" },
+    { to: "/compras/pedidos", label: "Compras" },
     { to: "/relatorios", label: "Relatórios" },
+    { to: "/mapa", label: "Mapa" },
 ];
 
 export const Header = () => {
@@ -48,6 +58,30 @@ export const Header = () => {
           </div>
         </form>
       </div>
+
+      <Button variant="outline" size="icon" className="h-8 w-8">
+        <Bell className="h-4 w-4" />
+        <span className="sr-only">Toggle notifications</span>
+      </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="secondary" size="icon" className="rounded-full">
+            <CircleUser className="h-5 w-5" />
+            <span className="sr-only">Toggle user menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>
+            <Link to="/configuracoes">Configurações</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem>Suporte</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>Sair</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
   );
 };

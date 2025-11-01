@@ -1,0 +1,33 @@
+import { TrendingUp } from "lucide-react";
+import { Line, LineChart, ResponsiveContainer, Tooltip } from "recharts";
+import { DashboardCard } from "./DashboardCard";
+
+const data = [
+  { average: 41 }, { average: 35 }, { average: 51 }, { average: 49 },
+  { average: 62 }, { average: 69 }, { average: 91 }, { average: 148 },
+];
+
+export const MarginChartCard = () => {
+  return (
+    <DashboardCard title="Margem de Lucro Média" Icon={TrendingUp}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="text-2xl font-bold">42.5%</div>
+          <p className="text-xs text-muted-foreground">+2.1% do último mês</p>
+        </div>
+        <div className="h-[60px] w-[120px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
+              <Tooltip
+                contentStyle={{ background: "transparent", border: "none" }}
+                labelStyle={{ display: "none" }}
+                position={{ x: 10, y: 60 }}
+              />
+              <Line type="monotone" dataKey="average" stroke="#8884d8" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </DashboardCard>
+  );
+};
