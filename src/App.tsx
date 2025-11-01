@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import Estoque from "./pages/Estoque";
 import Fornecedores from "./pages/Fornecedores";
 import PedidosCompra from "./pages/PedidosCompra";
+import NovoPedidoCompra from "./pages/NovoPedidoCompra";
 import Clientes from "./pages/Clientes";
 import PedidosVenda from "./pages/PedidosVenda";
 import NovoPedidoVenda from "./pages/NovoPedidoVenda";
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/estoque" element={<Estoque />} />
               <Route path="/compras/fornecedores" element={<Fornecedores />} />
               <Route path="/compras/pedidos" element={<PedidosCompra />} />
+              <Route path="/compras/pedidos/novo" element={<NovoPedidoCompra />} />
               <Route path="/vendas/clientes" element={<Clientes />} />
               <Route path="/vendas/clientes/:customerId" element={<HistoricoCliente />} />
               <Route path="/vendas/pedidos" element={<PedidosVenda />} />
