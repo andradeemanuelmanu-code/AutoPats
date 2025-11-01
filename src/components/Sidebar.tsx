@@ -22,11 +22,17 @@ import {
 const navItems = [
   { to: "/", label: "Dashboard", Icon: LayoutDashboard },
   { to: "/estoque", label: "Estoque", Icon: Package },
-  { to: "/vendas", label: "Vendas", Icon: ShoppingCart },
+  {
+    label: "Vendas",
+    Icon: ShoppingCart,
+    subItems: [
+      { to: "/vendas/clientes", label: "Clientes", Icon: Users },
+      { to: "/vendas/pedidos", label: "Pedidos de Venda", Icon: ClipboardList },
+    ],
+  },
   {
     label: "Compras",
     Icon: ClipboardList,
-    to: "/compras",
     subItems: [
       { to: "/compras/fornecedores", label: "Fornecedores", Icon: Users },
       { to: "/compras/pedidos", label: "Pedidos de Compra", Icon: Truck },
@@ -54,7 +60,6 @@ const NavItem = ({ to, label, Icon }) => (
 
 export const Sidebar = () => {
   const location = useLocation();
-  const comprasPaths = ["/compras/fornecedores", "/compras/pedidos"];
   
   return (
     <div className="hidden border-r bg-card md:block">
@@ -69,10 +74,10 @@ export const Sidebar = () => {
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             {navItems.map((item) =>
               item.subItems ? (
-                <Accordion key={item.label} type="single" collapsible defaultValue={comprasPaths.some(p => location.pathname.startsWith(p)) ? "item-1" : ""}>
-                  <AccordionItem value="item-1" className="border-b-0">
+                <Accordion key={item.label} type="single" collapsible defaultValue={item.subItems.some(p => location.pathname.startsWith(p.to)) ? item.label : ""}>
+                  <AccordionItem value={item.label} className="border-b-0">
                     <AccordionTrigger className="py-2 hover:no-underline rounded-lg px-3 [&[data-state=open]]:bg-muted">
-                      <div className={cn("flex items-center gap-3 text-muted-foreground", { "text-primary": comprasPaths.some(p => location.pathname.startsWith(p)) })}>
+                      <div className={cn("flex items-center gap-3 text-muted-foreground", { "text-primary": item.subItems.some(p => location.pathname.startsWith(p.to)) })}>
                         <item.Icon className="h-4 w-4" />
                         {item.label}
                       </div>
