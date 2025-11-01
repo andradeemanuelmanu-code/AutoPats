@@ -27,40 +27,6 @@ const OtimizacaoRotas = () => {
     });
   };
 
-  const processRouteResponse = (response: any, startCoords: Coordinates, selectedCustomers: Customer[]) => {
-    const feature = response.data.features[0];
-    const segments = feature.properties.segments;
-    const waypoints = feature.properties.summary.way_points; // [start_index, end_index, permutation...]
-
-    // 1. Ordenar os clientes
-    const customerOrder = waypoints.slice(2).map((waypointIndex: number) => selectedCustomers[waypointIndex]);
-    const sequencedCustomers: OrderedCustomer[] = customerOrder.map((customer, index) => ({
-      ...customer,
-      sequence: index + 1,
-    }));
-    setOrderedCustomers(sequencedCustomers);
-
-    // 2. Separar rotas de ida e volta
-    const allCoordinates = feature.geometry.coordinates.map((c: number[]) => ({ lat: c[1], lng: c[0] }));
-    
-    let lastCustomerCoordIndex = 0;
-    for (let i = 0; i < segments.length - 1; i++) {
-      lastCustomerCoordIndex += segments[i].steps.length;
-    }
-    
-    const finalSegment = segments[segments.length - 1];
-    const finalSegmentCoords = finalSegment.steps.flatMap((step: any) => step.way_points.map((wpIndex: number) => allCoordinates[wpIndex]));
-    
-    const lastCustomerInRoute = sequencedCustomers[sequencedCustomers.length - 1];
-    const lastCustomerCoords = { lat: lastCustomerInRoute.lat, lng: lastCustomerInRoute.lng };
-
-    const outboundPath = allCoordinates.slice(0, finalSegmentCoords[0]);
-    const returnPath = allCoordinates.slice(finalSegmentCoords[0]);
-
-    setOutboundRoute([startCoords, ...outboundPath, lastCustomerCoords]);
-    setReturnRoute([lastCustomerCoords, ...returnPath, startCoords]);
-  };
-
   const handleGenerateRoute = () => {
     setIsGenerating(true);
     const toastId = showLoading("Obtendo sua localização...");
@@ -74,24 +40,85 @@ const OtimizacaoRotas = () => {
         const processingToastId = showLoading("Calculando a rota otimizada...");
         
         try {
-          const selected = customers.filter(c => selectedCustomerIds.has(c.id));
-          const customerCoords = selected.map(c => ({ lat: c.lat, lng: c.lng }));
-          
           const apiKey = import.meta.env.VITE_ORS_API_KEY;
           if (!apiKey || apiKey.includes("COLE_SUA_CHAVE")) {
             throw new Error("Chave da API do OpenRouteService não configurada.");
           }
 
-          const coordinates = [[userCoords.lng, userCoords.lat], ...customerCoords.map(p => [p.lng, p.lat])];
-          const response = await axios.post('https://api.openrouteservice.org/v2/directions/driving-car/geojson', { coordinates }, { headers: { 'Authorization': apiKey } });
+          const selected = customers.filter(c => selectedCustomerIds.has(c.id));
+          
+          // ETAPA 1: Obter a ordem otimizada do endpoint de otimização
+          const optimizationRequest = {
+            jobs: selected.map(customer => ({
+              id: customer.id,
+              location: [customer.lng, customer.lat]
+            })),
+            vehicles: [{
+              id: 1,
+              profile: 'driving-car',
+              start: [userCoords.lng, userCoords.lat],
+              end: [userCoords.lng, userCoords.lat]
+            }]
+          };
 
-          processRouteResponse(response, userCoords, selected);
+          const optimizationResponse = await axios.post(
+            'https://api.openrouteservice.org/v2/optimization',
+            optimizationRequest,
+            { headers: { 'Authorization': apiKey } }
+          );
+
+          const orderedSteps = optimizationResponse.data.routes[0].steps;
+          const jobSteps = orderedSteps.filter((step: any) => step.type === 'job');
+          
+          const orderedCustomerIds = jobSteps.map((step: any) => step.id);
+          const sequencedCustomers: OrderedCustomer[] = orderedCustomerIds.map((id: string, index: number) => {
+            const customer = customers.find(c => c.id === id)!;
+            return { ...customer, sequence: index + 1 };
+          });
+          setOrderedCustomers(sequencedCustomers);
+
+          // ETAPA 2: Obter a geometria da rota do endpoint de direções usando a ordem otimizada
+          const orderedCoordinates = [
+            [userCoords.lng, userCoords.lat],
+            ...sequencedCustomers.map(c => [c.lng, c.lat]),
+            [userCoords.lng, userCoords.lat]
+          ];
+
+          const directionsResponse = await axios.post(
+            'https://api.openrouteservice.org/v2/directions/driving-car/geojson',
+            { coordinates: orderedCoordinates },
+            { headers: { 'Authorization': apiKey } }
+          );
+
+          // ETAPA 3: Processar a resposta das direções para dividir a rota
+          const feature = directionsResponse.data.features[0];
+          const segments = feature.properties.segments;
+          const allCoordinates = feature.geometry.coordinates.map((c: number[]) => ({ lat: c[1], lng: c[0] }));
+
+          // O último segmento é a viagem de volta
+          const lastSegmentIndex = segments.length - 1;
+          
+          let returnTripStartIndexInCoords = 0;
+          for (let i = 0; i < lastSegmentIndex; i++) {
+            // A propriedade way_points nos diz os índices no array de coordenadas
+            returnTripStartIndexInCoords = segments[i].way_points[1];
+          }
+          
+          const lastCustomerInRoute = sequencedCustomers[sequencedCustomers.length - 1];
+          const lastCustomerCoords = { lat: lastCustomerInRoute.lat, lng: lastCustomerInRoute.lng };
+
+          const outboundPath = allCoordinates.slice(0, returnTripStartIndexInCoords + 1);
+          const returnPath = allCoordinates.slice(returnTripStartIndexInCoords);
+
+          setOutboundRoute(outboundPath);
+          setReturnRoute(returnPath);
           
           dismissToast(processingToastId);
           showSuccess("Rota gerada com sucesso!");
         } catch (error) {
           console.error("Erro ao gerar rota:", error);
-          showError(error.message || "Falha ao calcular a rota.");
+          const errorMessage = error.response?.data?.error?.message || error.message || "Falha ao calcular a rota.";
+          showError(errorMessage);
           dismissToast(processingToastId);
         } finally {
           setIsGenerating(false);
