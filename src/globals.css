@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  /* Novo tema "Latte" - Padrão do Sistema (Modo Claro) */
-  :root {
+  /* Tema Padrão (Latte) */
+  :root, .latte {
     --background: 24 44% 96%; /* Cream */
     --foreground: 24 10% 10%; /* Dark Brown */
     --card: 15 33% 99%; /* Lighter Cream */

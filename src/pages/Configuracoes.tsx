@@ -76,16 +76,16 @@ const Configuracoes = () => {
           <CardContent>
             <RadioGroup value={theme} onValueChange={setTheme} className="space-y-2">
               <div className="flex items-center space-x-2">
+                <RadioGroupItem value="latte" id="latte" />
+                <Label htmlFor="latte">Latte (Padrão)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
                 <RadioGroupItem value="light" id="light" />
                 <Label htmlFor="light">Claro</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="dark" id="dark" />
                 <Label htmlFor="dark">Escuro</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="system" id="system" />
-                <Label htmlFor="system">Padrão do Sistema</Label>
               </div>
             </RadioGroup>
           </CardContent>
