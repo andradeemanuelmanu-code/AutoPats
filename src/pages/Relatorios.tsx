@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { File, Loader2 } from "lucide-react";
 import { ReportCard } from "@/components/relatorios/ReportCard";
@@ -15,64 +15,51 @@ const Relatorios = () => {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
+    if (!pdfRef.current) return;
     setIsGeneratingPdf(true);
-  };
-
-  useEffect(() => {
-    if (!isGeneratingPdf || !pdfRef.current) return;
-
     const toastId = showLoading("Gerando PDF do relatório...");
-    const element = pdfRef.current;
 
-    // Adiciona um pequeno atraso para garantir que tudo esteja renderizado
-    setTimeout(() => {
-      html2canvas(element, {
-        scale: 2, // Melhora a resolução
-        useCORS: true,
-        backgroundColor: '#ffffff', // Define um fundo branco
-      })
-        .then((canvas) => {
-          const imgData = canvas.toDataURL('image/png');
-          const pdf = new jsPDF('p', 'mm', 'a4');
-          
-          const imgProps = pdf.getImageProperties(imgData);
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = pdf.internal.pageSize.getHeight();
-          const imgWidth = pdfWidth;
-          const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-          
-          let heightLeft = imgHeight;
-          let position = 0;
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageElements = pdfRef.current.querySelectorAll<HTMLElement>('.pdf-page');
 
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pdfHeight;
-
-          while (heightLeft > 0) {
-            position -= pdfHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pdfHeight;
-          }
-          
-          pdf.save(`relatorio-geral-${new Date().toISOString().split('T')[0]}.pdf`);
-          dismissToast(toastId);
-          showSuccess("Relatório exportado com sucesso!");
-        })
-        .catch(err => {
-          console.error("Erro ao gerar PDF:", err);
-          dismissToast(toastId);
-          showError("Ocorreu um erro ao gerar o PDF.");
-        })
-        .finally(() => {
-          setIsGeneratingPdf(false);
+      for (let i = 0; i < pageElements.length; i++) {
+        const element = pageElements[i];
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
         });
-    }, 500); // Atraso de 500ms
-  }, [isGeneratingPdf]);
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        if (i > 0) {
+          pdf.addPage();
+        }
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      }
+
+      pdf.save(`relatorio-geral-${new Date().toISOString().split('T')[0]}.pdf`);
+      dismissToast(toastId);
+      showSuccess("Relatório exportado com sucesso!");
+    } catch (err) {
+      console.error("Erro ao gerar PDF:", err);
+      dismissToast(toastId);
+      showError("Ocorreu um erro ao gerar o PDF.");
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   return (
     <>
-      {isGeneratingPdf && <PdfDocument ref={pdfRef} />}
+      <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
+        {/* Renderiza o componente para referência, mesmo que a lógica principal o acesse diretamente */}
+        <PdfDocument ref={pdfRef} />
+      </div>
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground">Relatórios Gerenciais</h1>
         <div className="flex items-center gap-2">
