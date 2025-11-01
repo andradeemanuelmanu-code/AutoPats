@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { DollarSign, Package, Activity, BarChart, PieChart, TrendingUp } from "lucide-react";
+import { DollarSign, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/KpiCard";
@@ -10,13 +11,27 @@ import { OrderStatusChart } from "@/components/dashboard/OrderStatusChart";
 import { StockMovementChart } from "@/components/dashboard/StockMovementChart";
 
 const Index = () => {
+  const [period, setPeriod] = useState('month');
+
   return (
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground">Dashboard</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">Este Mês</Button>
-          <Button variant="ghost" size="sm">Este Ano</Button>
+          <Button
+            variant={period === 'month' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setPeriod('month')}
+          >
+            Este Mês
+          </Button>
+          <Button
+            variant={period === 'year' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setPeriod('year')}
+          >
+            Este Ano
+          </Button>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -26,6 +41,7 @@ const Index = () => {
           change="+20.1% do último mês"
           changeType="positive"
           Icon={DollarSign}
+          linkTo="/relatorios"
         />
         <KpiCard
           title="Giro de Estoque"
@@ -33,33 +49,38 @@ const Index = () => {
           change="-2.4% da última hora"
           changeType="negative"
           Icon={Activity}
+          linkTo="/estoque"
         />
         <StockAlertsCard />
-        <MarginChartCard />
+        <MarginChartCard linkTo="/relatorios" />
       </div>
       <div className="grid gap-4 md:gap-8 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Status dos Pedidos de Venda</CardTitle>
-            <CardDescription>Distribuição dos pedidos por status este mês.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <OrderStatusChart />
-          </CardContent>
-        </Card>
+        <Link to="/vendas/pedidos" className="lg:col-span-3 hover:opacity-90 transition-opacity">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Status dos Pedidos de Venda</CardTitle>
+              <CardDescription>Distribuição dos pedidos por status este mês.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <OrderStatusChart />
+            </CardContent>
+          </Card>
+        </Link>
         <div className="lg:col-span-2">
-          <TopProductsCard />
+          <TopProductsCard linkTo="/relatorios" />
         </div>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Movimentação de Estoque</CardTitle>
-          <CardDescription>Entradas e saídas de unidades de produtos.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <StockMovementChart />
-        </CardContent>
-      </Card>
+      <Link to="/estoque" className="block hover:opacity-90 transition-opacity">
+        <Card>
+          <CardHeader>
+            <CardTitle>Movimentação de Estoque</CardTitle>
+            <CardDescription>Entradas e saídas de unidades de produtos.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <StockMovementChart />
+          </CardContent>
+        </Card>
+      </Link>
     </>
   );
 };

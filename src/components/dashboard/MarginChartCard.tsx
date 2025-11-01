@@ -7,9 +7,9 @@ const data = [
   { average: 62 }, { average: 69 }, { average: 91 }, { average: 148 },
 ];
 
-export const MarginChartCard = () => {
+export const MarginChartCard = ({ linkTo }: { linkTo?: string }) => {
   return (
-    <DashboardCard title="Margem de Lucro Média" Icon={TrendingUp}>
+    <DashboardCard title="Margem de Lucro Média" Icon={TrendingUp} linkTo={linkTo}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-2xl font-bold">42.5%</div>

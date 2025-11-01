@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface KpiCardProps {
   title: string;
@@ -7,12 +8,14 @@ interface KpiCardProps {
   change: string;
   changeType: "positive" | "negative";
   Icon: LucideIcon;
+  linkTo?: string;
 }
 
-export const KpiCard = ({ title, value, change, changeType, Icon }: KpiCardProps) => {
+export const KpiCard = ({ title, value, change, changeType, Icon, linkTo }: KpiCardProps) => {
   const isPositive = changeType === "positive";
-  return (
-    <Card>
+  
+  const content = (
+    <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -25,4 +28,14 @@ export const KpiCard = ({ title, value, change, changeType, Icon }: KpiCardProps
       </CardContent>
     </Card>
   );
+
+  if (linkTo) {
+    return (
+      <Link to={linkTo} className="hover:opacity-90 transition-opacity">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 };

@@ -3,7 +3,7 @@ import { Star } from "lucide-react";
 import { mockSalesOrders } from "@/data/salesOrders";
 import { DashboardCard } from "./DashboardCard";
 
-export const TopProductsCard = () => {
+export const TopProductsCard = ({ linkTo }: { linkTo?: string }) => {
   const topProducts = useMemo(() => {
     const productSales: { [key: string]: { name: string; quantity: number } } = {};
 
@@ -24,7 +24,7 @@ export const TopProductsCard = () => {
   }, []);
 
   return (
-    <DashboardCard title="Produtos Mais Vendidos" Icon={Star}>
+    <DashboardCard title="Produtos Mais Vendidos" Icon={Star} linkTo={linkTo}>
       <ul className="space-y-1 text-sm">
         {topProducts.map((product, index) => (
           <li key={index} className="flex justify-between items-center">
