@@ -1,19 +1,19 @@
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
-import { mockSalesOrders } from '@/data/salesOrders';
-import { mockPurchaseOrders } from '@/data/purchaseOrders';
 import { useMemo } from 'react';
+import { useAppData } from '@/context/AppDataContext';
 
 export const StockMovementChart = () => {
+  const { salesOrders, purchaseOrders } = useAppData();
   const chartData = useMemo(() => {
     const movements: { [date: string]: { entradas: number; saidas: number } } = {};
 
-    mockPurchaseOrders.filter(o => o.status === 'Recebido').forEach(order => {
+    purchaseOrders.filter(o => o.status === 'Recebido').forEach(order => {
       const date = new Date(order.date).toLocaleDateString('pt-BR');
       if (!movements[date]) movements[date] = { entradas: 0, saidas: 0 };
       movements[date].entradas += order.items.reduce((acc, item) => acc + item.quantity, 0);
     });
 
-    mockSalesOrders.filter(o => o.status === 'Faturado').forEach(order => {
+    salesOrders.filter(o => o.status === 'Faturado').forEach(order => {
       const date = new Date(order.date).toLocaleDateString('pt-BR');
       if (!movements[date]) movements[date] = { entradas: 0, saidas: 0 };
       movements[date].saidas += order.items.reduce((acc, item) => acc + item.quantity, 0);
@@ -24,7 +24,7 @@ export const StockMovementChart = () => {
       Entradas: movements[date].entradas,
       Saídas: movements[date].saidas,
     })).sort((a, b) => new Date(a.date.split('/').reverse().join('-')).getTime() - new Date(b.date.split('/').reverse().join('-')).getTime());
-  }, []);
+  }, [salesOrders, purchaseOrders]);
 
   return (
     <ResponsiveContainer width="100%" height={300}>

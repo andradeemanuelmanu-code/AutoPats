@@ -10,11 +10,13 @@ import Fornecedores from "./pages/Fornecedores";
 import PedidosCompra from "./pages/PedidosCompra";
 import Clientes from "./pages/Clientes";
 import PedidosVenda from "./pages/PedidosVenda";
+import NovoPedidoVenda from "./pages/NovoPedidoVenda";
 import Mapa from "./pages/Mapa";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 import { Layout } from "./components/Layout";
 import HistoricoCliente from "./pages/HistoricoCliente";
+import { AppDataProvider } from "./context/AppDataContext";
 
 const queryClient = new QueryClient();
 
@@ -23,23 +25,26 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/estoque" element={<Estoque />} />
-            <Route path="/compras/fornecedores" element={<Fornecedores />} />
-            <Route path="/compras/pedidos" element={<PedidosCompra />} />
-            <Route path="/vendas/clientes" element={<Clientes />} />
-            <Route path="/vendas/clientes/:customerId" element={<HistoricoCliente />} />
-            <Route path="/vendas/pedidos" element={<PedidosVenda />} />
-            <Route path="/mapa" element={<Mapa />} />
-            <Route path="/relatorios" element={<Relatorios />} />
-            <Route path="/configuracoes" element={<Configuracoes />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AppDataProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/estoque" element={<Estoque />} />
+              <Route path="/compras/fornecedores" element={<Fornecedores />} />
+              <Route path="/compras/pedidos" element={<PedidosCompra />} />
+              <Route path="/vendas/clientes" element={<Clientes />} />
+              <Route path="/vendas/clientes/:customerId" element={<HistoricoCliente />} />
+              <Route path="/vendas/pedidos" element={<PedidosVenda />} />
+              <Route path="/vendas/pedidos/novo" element={<NovoPedidoVenda />} />
+              <Route path="/mapa" element={<Mapa />} />
+              <Route path="/relatorios" element={<Relatorios />} />
+              <Route path="/configuracoes" element={<Configuracoes />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AppDataProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

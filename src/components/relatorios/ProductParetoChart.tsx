@@ -1,14 +1,14 @@
 import { ComposedChart, Bar, Line, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { mockSalesOrders } from '@/data/salesOrders';
-import { mockProducts } from '@/data/products';
 import { useMemo } from 'react';
+import { useAppData } from '@/context/AppDataContext';
 
 export const ProductParetoChart = () => {
+  const { salesOrders, products } = useAppData();
   const chartData = useMemo(() => {
     const productSales: { [key: string]: number } = {};
 
     // 1. Agrega as vendas por produto
-    mockSalesOrders
+    salesOrders
       .filter(order => order.status === 'Faturado')
       .forEach(order => {
         order.items.forEach(item => {
@@ -26,7 +26,7 @@ export const ProductParetoChart = () => {
     let cumulativeValue = 0;
     const sortedProducts = Object.entries(productSales)
       .map(([productId, sales]) => {
-        const product = mockProducts.find(p => p.id === productId);
+        const product = products.find(p => p.id === productId);
         return {
           name: product ? product.description.substring(0, 20) + '...' : 'Desconhecido', // Limita o nome
           Vendas: sales,
@@ -42,7 +42,7 @@ export const ProductParetoChart = () => {
       });
 
     return sortedProducts;
-  }, []);
+  }, [salesOrders, products]);
 
   return (
     <div className="h-[350px]">

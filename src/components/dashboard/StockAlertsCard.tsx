@@ -1,14 +1,13 @@
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
 import { AlertTriangle } from "lucide-react";
-import { mockProducts } from "@/data/products";
 import { DashboardCard } from "./DashboardCard";
-import { Button } from "@/components/ui/button";
+import { useAppData } from "@/context/AppDataContext";
 
 export const StockAlertsCard = () => {
+  const { products } = useAppData();
   const lowStockCount = useMemo(() => {
-    return mockProducts.filter(p => p.stock <= p.minStock).length;
-  }, []);
+    return products.filter(p => p.stock <= p.minStock).length;
+  }, [products]);
 
   return (
     <DashboardCard title="Alertas de Estoque" Icon={AlertTriangle} linkTo="/estoque">

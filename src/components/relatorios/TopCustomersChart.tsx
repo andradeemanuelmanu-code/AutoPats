@@ -1,12 +1,13 @@
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { mockSalesOrders } from '@/data/salesOrders';
 import { useMemo } from 'react';
+import { useAppData } from '@/context/AppDataContext';
 
 export const TopCustomersChart = () => {
+  const { salesOrders } = useAppData();
   const chartData = useMemo(() => {
     const salesByCustomer: { [key: string]: number } = {};
 
-    mockSalesOrders
+    salesOrders
       .filter(order => order.status === 'Faturado')
       .forEach(order => {
         if (!salesByCustomer[order.customerName]) {
@@ -22,7 +23,7 @@ export const TopCustomersChart = () => {
       }))
       .sort((a, b) => b.Faturamento - a.Faturamento)
       .slice(0, 5);
-  }, []);
+  }, [salesOrders]);
 
   return (
     <div className="h-[350px]">

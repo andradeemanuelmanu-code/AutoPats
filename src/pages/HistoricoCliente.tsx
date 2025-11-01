@@ -1,17 +1,17 @@
 import { useParams, Link } from "react-router-dom";
-import { mockCustomers } from "@/data/customers";
-import { mockSalesOrders } from "@/data/salesOrders";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Phone, Mail } from "lucide-react";
 import { SalesOrderTable } from "@/components/vendas/SalesOrderTable";
 import NotFound from "./NotFound";
+import { useAppData } from "@/context/AppDataContext";
 
 const HistoricoCliente = () => {
   const { customerId } = useParams<{ customerId: string }>();
+  const { customers, salesOrders } = useAppData();
   
-  const customer = mockCustomers.find(c => c.id === customerId);
-  const customerOrders = mockSalesOrders.filter(o => o.customerId === customerId);
+  const customer = customers.find(c => c.id === customerId);
+  const customerOrders = salesOrders.filter(o => o.customerId === customerId);
 
   if (!customer) {
     return <NotFound />;

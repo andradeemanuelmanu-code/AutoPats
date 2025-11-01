@@ -1,13 +1,14 @@
 import { useMemo } from "react";
 import { Star } from "lucide-react";
-import { mockSalesOrders } from "@/data/salesOrders";
 import { DashboardCard } from "./DashboardCard";
+import { useAppData } from "@/context/AppDataContext";
 
 export const TopProductsCard = ({ linkTo }: { linkTo?: string }) => {
+  const { salesOrders } = useAppData();
   const topProducts = useMemo(() => {
     const productSales: { [key: string]: { name: string; quantity: number } } = {};
 
-    mockSalesOrders
+    salesOrders
       .filter(order => order.status === 'Faturado')
       .forEach(order => {
         order.items.forEach(item => {
@@ -21,7 +22,7 @@ export const TopProductsCard = ({ linkTo }: { linkTo?: string }) => {
     return Object.values(productSales)
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 5);
-  }, []);
+  }, [salesOrders]);
 
   return (
     <DashboardCard title="Produtos Mais Vendidos" Icon={Star} linkTo={linkTo}>

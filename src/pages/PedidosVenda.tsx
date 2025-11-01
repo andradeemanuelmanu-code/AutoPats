@@ -1,22 +1,23 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
-import { mockSalesOrders, SalesOrder } from "@/data/salesOrders";
 import { SalesOrderTable } from "@/components/vendas/SalesOrderTable";
+import { useAppData } from "@/context/AppDataContext";
 
 const PedidosVenda = () => {
-  const [orders, setOrders] = useState<SalesOrder[]>(mockSalesOrders);
+  const { salesOrders } = useAppData();
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredOrders = useMemo(() => {
-    if (!searchTerm) return orders;
+    if (!searchTerm) return salesOrders;
     const lowercasedTerm = searchTerm.toLowerCase();
-    return orders.filter(order =>
+    return salesOrders.filter(order =>
       order.number.toLowerCase().includes(lowercasedTerm) ||
       order.customerName.toLowerCase().includes(lowercasedTerm)
     );
-  }, [orders, searchTerm]);
+  }, [salesOrders, searchTerm]);
 
   return (
     <>
@@ -33,9 +34,11 @@ const PedidosVenda = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Novo Pedido
+          <Button asChild>
+            <Link to="/vendas/pedidos/novo">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Novo Pedido
+            </Link>
           </Button>
         </div>
       </div>

@@ -10,25 +10,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { mockProducts, Product } from "@/data/products";
+import { Product } from "@/data/products";
 import { showSuccess, showError } from "@/utils/toast";
+import { useAppData } from "@/context/AppDataContext";
 
 const Estoque = () => {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  // NOTE: Product state is now managed globally, but edits/deletes here are local for now.
+  // A full implementation would require update/delete functions in the context.
+  const { products: globalProducts } = useAppData();
+  const [products, setProducts] = useState<Product[]>(globalProducts);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredProducts = useMemo(() => {
-    if (!searchTerm) return products;
+    const sourceProducts = products.map(p => {
+      const globalProduct = globalProducts.find(gp => gp.id === p.id);
+      return globalProduct ? { ...p, stock: globalProduct.stock } : p;
+    });
+
+    if (!searchTerm) return sourceProducts;
     const lowercasedTerm = searchTerm.toLowerCase();
-    return products.filter(product =>
+    return sourceProducts.filter(product =>
       product.code.toLowerCase().includes(lowercasedTerm) ||
       product.description.toLowerCase().includes(lowercasedTerm) ||
       product.category.toLowerCase().includes(lowercasedTerm) ||
       product.brand.toLowerCase().includes(lowercasedTerm)
     );
-  }, [products, searchTerm]);
+  }, [products, globalProducts, searchTerm]);
 
   const handleOpenModal = (product: Product | null) => {
     setEditingProduct(product);
