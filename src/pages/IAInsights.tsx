@@ -22,17 +22,20 @@ const IAInsights = () => {
       switch (type) {
         case 'demand':
           setDemandInsight(
-            'Com base nas tendências de vendas históricas e sazonalidade, prevemos que a demanda por "Vela de Ignição Laser Iridium" aumentará em 15% no próximo mês.\n\n**Recomendação:** Aumentar o pedido de compra em 20 unidades para evitar ruptura de estoque.'
+            'Analisamos os dados de vendas dos últimos 6 meses e identificamos um padrão de crescimento consistente de 5% ao mês para **"Vela de Ignição Laser Iridium"**. Além disso, nossos modelos sazonais indicam um aumento adicional de 10% neste período do ano, historicamente ligado à preparação para viagens de férias. A combinação desses fatores resulta em uma previsão de aumento de **15% na demanda** para o próximo mês.' +
+            '\n\n**Recomendação Estratégica:** Considerando o estoque atual de 150 unidades e o tempo de entrega de 15 dias do fornecedor principal, recomendamos um pedido de compra de **50 unidades** para manter o estoque de segurança e atender à demanda projetada sem risco de ruptura.'
           );
           break;
         case 'crossSell':
           setCrossSellInsight(
-            'Clientes que compram "Pastilha de Freio Dianteira" frequentemente também compram "Filtro de Óleo do Motor".\n\n**Recomendação:** Oferecer um desconto de 5% na compra conjunta desses itens.'
+            'Nossa análise de **1.245 transações** revelou que **68%** dos clientes que adquiriram **"Pastilha de Freio Dianteira"** também compraram **"Filtro de Óleo do Motor"** na mesma transação ou em até 30 dias. Este é o par de produtos com a maior correlação de compra em seu catálogo.' +
+            '\n\n**Recomendação de Ação:** Implementar uma campanha de **"Compre Junto"** no ponto de venda, oferecendo um desconto de 5% no filtro de óleo na compra da pastilha de freio. Estimamos que essa ação pode aumentar o ticket médio em até **R$ 12,50** por transação elegível e impulsionar as vendas de filtros em 25%.'
           );
           break;
         case 'supplier':
           setSupplierInsight(
-            'O fornecedor "Fornecedora Minas Parts" está atualmente com status Inativo.\n\n**Recomendação:** Buscar fornecedores alternativos para os produtos que eram fornecidos por eles para garantir a continuidade do estoque.'
+            'Identificamos que o fornecedor **"Fornecedora Minas Parts"**, cujo status é **"Inativo"**, é o fornecedor exclusivo de 2 produtos de alta criticidade: "Amortecedor Traseiro" e "Kit Correia Alternador". O estoque atual desses itens (12 e 8 unidades, respectivamente) representa uma autonomia de apenas **2 semanas** com base na média de vendas.' +
+            '\n\n**Recomendação de Risco:**\n**Ação Imediata:** Contatar os fornecedores secundários "Distribuidora de Peças São Paulo" e "Autopeças Rio" para verificar a disponibilidade e negociar preços para esses itens. \n**Ação Preventiva:** Revisar e diversificar o portfólio de fornecedores para todos os produtos de "Curva A" para mitigar riscos futuros na cadeia de suprimentos.'
           );
           break;
       }
@@ -42,14 +45,13 @@ const IAInsights = () => {
   const renderInsightContent = (
     type: InsightType,
     insight: string | null,
-    description: string,
-    recommendation: string
+    description: string
   ) => {
     if (insight) {
       return (
         <div className="space-y-2">
           {insight.split('\n\n').map((paragraph, index) => (
-            <p key={index} className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+            <div key={index} className="text-sm text-muted-foreground space-y-1" dangerouslySetInnerHTML={{ __html: paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br />') }} />
           ))}
         </div>
       );
@@ -91,10 +93,9 @@ const IAInsights = () => {
             {renderInsightContent(
               'demand',
               demandInsight,
-              'A IA analisará seus dados de vendas para prever a demanda futura de produtos-chave, ajudando a evitar falta ou excesso de estoque.',
-              ''
+              'A IA analisará seus dados de vendas para prever a demanda futura de produtos-chave, ajudando a evitar falta ou excesso de estoque.'
             )}
-          </CardContent>
+          </-CardContent>
         </Card>
 
         <Card>
@@ -109,8 +110,7 @@ const IAInsights = () => {
             {renderInsightContent(
               'crossSell',
               crossSellInsight,
-              'A IA identificará padrões de compra em seu histórico de vendas para sugerir produtos que são frequentemente comprados juntos.',
-              ''
+              'A IA identificará padrões de compra em seu histórico de vendas para sugerir produtos que são frequentemente comprados juntos.'
             )}
           </CardContent>
         </Card>
@@ -127,8 +127,7 @@ const IAInsights = () => {
             {renderInsightContent(
               'supplier',
               supplierInsight,
-              'A IA avaliará os dados dos seus fornecedores, como status e histórico, para identificar riscos potenciais que possam impactar seu estoque.',
-              ''
+              'A IA avaliará os dados dos seus fornecedores, como status e histórico, para identificar riscos potenciais que possam impactar seu estoque.'
             )}
           </CardContent>
         </Card>
