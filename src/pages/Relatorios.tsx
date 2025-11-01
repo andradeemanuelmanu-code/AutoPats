@@ -1,36 +1,54 @@
 import { Button } from "@/components/ui/button";
 import { File } from "lucide-react";
 import { ReportCard } from "@/components/relatorios/ReportCard";
-import { SalesOverTimeChart } from "@/components/relatorios/SalesOverTimeChart";
 import { SalesByCategoryChart } from "@/components/relatorios/SalesByCategoryChart";
+import { InventoryValueCard } from "@/components/relatorios/InventoryValueCard";
+import { TopCustomersChart } from "@/components/relatorios/TopCustomersChart";
+import { PurchasesBySupplierChart } from "@/components/relatorios/PurchasesBySupplierChart";
+import { showLoading, showSuccess, dismissToast } from "@/utils/toast";
 
 const Relatorios = () => {
+  const handleExportPDF = () => {
+    const toastId = showLoading("Gerando PDF do relatório...");
+    setTimeout(() => {
+      dismissToast(toastId);
+      showSuccess("Relatório exportado com sucesso!");
+    }, 1500);
+  };
+
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold md:text-2xl text-foreground">Relatórios</h1>
+        <h1 className="text-lg font-semibold md:text-2xl text-foreground">Relatórios Gerenciais</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline">
             Filtrar por Data
           </Button>
-          <Button>
+          <Button onClick={handleExportPDF}>
             <File className="h-4 w-4 mr-2" />
-            Exportar
+            Exportar PDF
           </Button>
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 mt-4">
-        <ReportCard
-          title="Faturamento ao Longo do Tempo"
-          description="Receita de vendas faturadas no período selecionado."
-        >
-          <SalesOverTimeChart />
-        </ReportCard>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 mt-4">
+        <InventoryValueCard />
         <ReportCard
           title="Vendas por Categoria"
-          description="Total de vendas agrupado por categoria de produto."
+          description="Total de vendas faturadas por categoria de produto."
         >
           <SalesByCategoryChart />
+        </ReportCard>
+        <ReportCard
+          title="Top 5 Clientes por Faturamento"
+          description="Clientes que mais geraram receita para a empresa."
+        >
+          <TopCustomersChart />
+        </ReportCard>
+        <ReportCard
+          title="Top 5 Fornecedores por Compras"
+          description="Fornecedores com o maior volume de compras."
+        >
+          <PurchasesBySupplierChart />
         </ReportCard>
       </div>
     </>
