@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
@@ -12,6 +12,18 @@ const Clientes = () => {
   const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredCustomers = useMemo(() => {
+    if (!searchTerm) return customers;
+    const lowercasedTerm = searchTerm.toLowerCase();
+    return customers.filter(customer =>
+      customer.name.toLowerCase().includes(lowercasedTerm) ||
+      customer.cpfCnpj.toLowerCase().includes(lowercasedTerm) ||
+      customer.email.toLowerCase().includes(lowercasedTerm) ||
+      customer.address.toLowerCase().includes(lowercasedTerm)
+    );
+  }, [customers, searchTerm]);
 
   const handleOpenModal = (customer: Customer | null) => {
     setEditingCustomer(customer);
@@ -49,7 +61,13 @@ const Clientes = () => {
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Buscar clientes..." className="pl-8 sm:w-[300px]" />
+            <Input
+              type="search"
+              placeholder="Buscar clientes..."
+              className="pl-8 sm:w-[300px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           <Button onClick={() => handleOpenModal(null)}>
             <PlusCircle className="h-4 w-4 mr-2" />
@@ -59,7 +77,7 @@ const Clientes = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {customers.map(customer => (
+        {filteredCustomers.map(customer => (
           <CustomerCard key={customer.id} customer={customer} onEdit={handleOpenModal} onDelete={handleDeleteCustomer} />
         ))}
       </div>

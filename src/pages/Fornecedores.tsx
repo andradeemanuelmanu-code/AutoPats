@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
@@ -12,6 +12,18 @@ const Fornecedores = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredSuppliers = useMemo(() => {
+    if (!searchTerm) return suppliers;
+    const lowercasedTerm = searchTerm.toLowerCase();
+    return suppliers.filter(supplier =>
+      supplier.name.toLowerCase().includes(lowercasedTerm) ||
+      supplier.cnpj.toLowerCase().includes(lowercasedTerm) ||
+      supplier.email.toLowerCase().includes(lowercasedTerm) ||
+      supplier.address.toLowerCase().includes(lowercasedTerm)
+    );
+  }, [suppliers, searchTerm]);
 
   const handleOpenModal = (supplier: Supplier | null) => {
     setEditingSupplier(supplier);
@@ -49,7 +61,13 @@ const Fornecedores = () => {
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Buscar fornecedores..." className="pl-8 sm:w-[300px]" />
+            <Input
+              type="search"
+              placeholder="Buscar fornecedores..."
+              className="pl-8 sm:w-[300px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           <Button onClick={() => handleOpenModal(null)}>
             <PlusCircle className="h-4 w-4 mr-2" />
@@ -59,7 +77,7 @@ const Fornecedores = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {suppliers.map(supplier => (
+        {filteredSuppliers.map(supplier => (
           <SupplierCard key={supplier.id} supplier={supplier} onEdit={handleOpenModal} onDelete={handleDeleteSupplier} />
         ))}
       </div>

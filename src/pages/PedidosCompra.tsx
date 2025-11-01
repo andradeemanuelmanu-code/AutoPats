@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
@@ -7,6 +7,16 @@ import { PurchaseOrderTable } from "@/components/compras/PurchaseOrderTable";
 
 const PedidosCompra = () => {
   const [orders, setOrders] = useState<PurchaseOrder[]>(mockPurchaseOrders);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredOrders = useMemo(() => {
+    if (!searchTerm) return orders;
+    const lowercasedTerm = searchTerm.toLowerCase();
+    return orders.filter(order =>
+      order.number.toLowerCase().includes(lowercasedTerm) ||
+      order.supplierName.toLowerCase().includes(lowercasedTerm)
+    );
+  }, [orders, searchTerm]);
 
   return (
     <>
@@ -15,7 +25,13 @@ const PedidosCompra = () => {
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Buscar pedidos..." className="pl-8 sm:w-[300px]" />
+            <Input
+              type="search"
+              placeholder="Buscar pedidos..."
+              className="pl-8 sm:w-[300px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           <Button>
             <PlusCircle className="h-4 w-4 mr-2" />
@@ -23,7 +39,7 @@ const PedidosCompra = () => {
           </Button>
         </div>
       </div>
-      <PurchaseOrderTable orders={orders} />
+      <PurchaseOrderTable orders={filteredOrders} />
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
@@ -17,6 +17,18 @@ const Estoque = () => {
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm) return products;
+    const lowercasedTerm = searchTerm.toLowerCase();
+    return products.filter(product =>
+      product.code.toLowerCase().includes(lowercasedTerm) ||
+      product.description.toLowerCase().includes(lowercasedTerm) ||
+      product.category.toLowerCase().includes(lowercasedTerm) ||
+      product.brand.toLowerCase().includes(lowercasedTerm)
+    );
+  }, [products, searchTerm]);
 
   const handleOpenModal = (product: Product | null) => {
     setEditingProduct(product);
@@ -30,14 +42,12 @@ const Estoque = () => {
 
   const handleSaveProduct = (data: Omit<Product, 'id' | 'stock'>) => {
     if (editingProduct) {
-      // Edit
       setProducts(products.map(p => p.id === editingProduct.id ? { ...editingProduct, ...data } : p));
       showSuccess("Produto atualizado com sucesso!");
     } else {
-      // Add
       const newProduct: Product = {
         id: `prod_${Date.now()}`,
-        stock: 0, // Initial stock
+        stock: 0,
         ...data,
       };
       setProducts([newProduct, ...products]);
@@ -60,7 +70,13 @@ const Estoque = () => {
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Buscar produtos..." className="pl-8 sm:w-[300px]" />
+            <Input
+              type="search"
+              placeholder="Buscar produtos..."
+              className="pl-8 sm:w-[300px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           <Button onClick={() => handleOpenModal(null)}>
             <PlusCircle className="h-4 w-4 mr-2" />
@@ -69,7 +85,7 @@ const Estoque = () => {
         </div>
       </div>
 
-      <ProductTable products={products} onEdit={(p) => handleOpenModal(p)} onDelete={handleDeleteProduct} />
+      <ProductTable products={filteredProducts} onEdit={(p) => handleOpenModal(p)} onDelete={handleDeleteProduct} />
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[625px]">
