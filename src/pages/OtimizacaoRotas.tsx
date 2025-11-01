@@ -11,6 +11,7 @@ type OrderedCustomer = Customer & { sequence: number };
 type RouteSummary = {
   distance: number; // em metros
   duration: number; // em segundos
+  tollCount: number;
 };
 
 const OtimizacaoRotas = () => {
@@ -22,6 +23,7 @@ const OtimizacaoRotas = () => {
   const [orderedCustomers, setOrderedCustomers] = useState<OrderedCustomer[] | null>(null);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [routeSummary, setRouteSummary] = useState<RouteSummary | null>(null);
+  const [tollLocations, setTollLocations] = useState<Coordinates[] | null>(null);
 
   const handleCustomerToggle = (customerId: string) => {
     setSelectedCustomerIds(prev => {
@@ -30,11 +32,11 @@ const OtimizacaoRotas = () => {
       else newSet.add(customerId);
       return newSet;
     });
-    // Limpa os dados da rota anterior se a seleção mudar
     setOutboundRoute(null);
     setReturnRoute(null);
     setOrderedCustomers(null);
     setRouteSummary(null);
+    setTollLocations(null);
   };
 
   const handleGenerateRoute = () => {
@@ -48,6 +50,7 @@ const OtimizacaoRotas = () => {
     setReturnRoute(null);
     setOrderedCustomers(null);
     setRouteSummary(null);
+    setTollLocations(null);
     const toastId = showLoading("Obtendo sua localização...");
 
     navigator.geolocation.getCurrentPosition(
@@ -77,24 +80,34 @@ const OtimizacaoRotas = () => {
             [userCoords.lng, userCoords.lat]
           ];
 
-          const headers = {
-            'Authorization': apiKey,
-            'Content-Type': 'application/json'
-          };
+          const headers = { 'Authorization': apiKey, 'Content-Type': 'application/json' };
+          const body = { coordinates, extras: ["tollways"] };
 
-          const directionsResponse = await axios.post(
-            '/ors-api/v2/directions/driving-car/geojson',
-            { coordinates },
-            { headers }
-          );
+          const directionsResponse = await axios.post('/ors-api/v2/directions/driving-car/geojson', body, { headers });
 
           const feature = directionsResponse.data.features[0];
           const allCoordinates = feature.geometry.coordinates.map((c: number[]) => ({ lat: c[1], lng: c[0] }));
           
+          const tollData = feature.properties.extras?.tollways?.values || [];
+          const currentTollLocations: Coordinates[] = [];
+          let tollCount = 0;
+          let onTollway = false;
+          tollData.forEach(([startIndex, , type]: [number, number, number]) => {
+            if (type > 0 && !onTollway) {
+              tollCount++;
+              onTollway = true;
+              currentTollLocations.push(allCoordinates[startIndex]);
+            } else if (type === 0) {
+              onTollway = false;
+            }
+          });
+          setTollLocations(currentTollLocations);
+
           const summary = feature.properties.summary;
           setRouteSummary({
             distance: summary.distance,
             duration: summary.duration,
+            tollCount: tollCount,
           });
           
           setOutboundRoute(allCoordinates);
@@ -144,6 +157,7 @@ const OtimizacaoRotas = () => {
           outboundRoute={outboundRoute}
           returnRoute={returnRoute}
           userLocation={userLocation}
+          tollLocations={tollLocations}
         />
       </div>
     </div>

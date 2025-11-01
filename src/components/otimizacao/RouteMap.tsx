@@ -7,6 +7,9 @@ import { useEffect } from "react";
 const userLocationSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#dc2626" width="32" height="32"><circle cx="12" cy="12" r="8" fill-opacity="0.7"/><circle cx="12" cy="12" r="8" stroke="#fff" stroke-width="2"><animate attributeName="r" from="8" to="12" dur="1.5s" begin="0s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="1.5s" begin="0s" repeatCount="indefinite"/></circle></svg>`;
 const userLocationIcon = new L.DivIcon({ html: userLocationSvg, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
 
+const tollSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#f97316" width="28" height="28"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c2.14-.46 3.5-1.78 3.5-3.97 0-2.02-1.31-3.39-4.2-4.08z"/></svg>`;
+const tollIcon = new L.DivIcon({ html: tollSvg, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
+
 const createNumberedIcon = (number: number) => {
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 42" width="32" height="42">
@@ -33,7 +36,7 @@ const ChangeView = ({ bounds }: { bounds: L.LatLngBoundsExpression | null }) => 
   return null;
 };
 
-export const RouteMap = ({ orderedCustomers, outboundRoute, returnRoute, userLocation }) => {
+export const RouteMap = ({ orderedCustomers, outboundRoute, returnRoute, userLocation, tollLocations }) => {
   const center: L.LatLngExpression = [-14.235004, -51.92528];
 
   const routeBounds = outboundRoute && returnRoute
@@ -60,6 +63,13 @@ export const RouteMap = ({ orderedCustomers, outboundRoute, returnRoute, userLoc
           icon={userLocationIcon}
         />
       )}
+      {tollLocations && tollLocations.map((toll, index) => (
+        <Marker
+          key={`toll-${index}`}
+          position={[toll.lat, toll.lng]}
+          icon={tollIcon}
+        />
+      ))}
       {outboundRoute && <Polyline pathOptions={{ color: 'blue' }} positions={outboundRoute} />}
       {returnRoute && <Polyline pathOptions={{ color: 'red', dashArray: '5, 10' }} positions={returnRoute} />}
     </MapContainer>

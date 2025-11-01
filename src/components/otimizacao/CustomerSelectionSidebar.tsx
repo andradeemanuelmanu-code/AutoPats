@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Route, Loader2, Milestone, Clock, DollarSign } from "lucide-react";
+import { Route, Loader2, Milestone, Clock, Ticket } from "lucide-react";
 import { Customer } from "@/data/customers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -14,7 +14,7 @@ interface CustomerSelectionSidebarProps {
   onCustomerToggle: (customerId: string) => void;
   onGenerateRoute: () => void;
   isGenerating: boolean;
-  routeSummary: { distance: number; duration: number } | null;
+  routeSummary: { distance: number; duration: number; tollCount: number } | null;
 }
 
 const formatDistance = (meters: number) => {
@@ -107,10 +107,10 @@ export const CustomerSelectionSidebar = ({
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <DollarSign className="h-4 w-4" />
-                  <span>Custo de Pedágio</span>
+                  <Ticket className="h-4 w-4" />
+                  <span>Quantidade de Pedágios</span>
                 </div>
-                <span className="font-semibold text-muted-foreground">N/A</span>
+                <span className="font-semibold">{routeSummary.tollCount}</span>
               </div>
             </CardContent>
           </Card>
