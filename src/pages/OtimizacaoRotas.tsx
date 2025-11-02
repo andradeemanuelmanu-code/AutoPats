@@ -83,7 +83,7 @@ const OtimizacaoRotas = () => {
           const headers = { 'Authorization': apiKey, 'Content-Type': 'application/json' };
           const body = { coordinates, extra_info: ["tollways"] };
 
-          const directionsResponse = await axios.post('/ors-api/v2/directions/driving-car/geojson', body, { headers });
+          const directionsResponse = await axios.post('https://api.openrouteservice.org/v2/directions/driving-car/geojson', body, { headers });
 
           const feature = directionsResponse.data.features[0];
           const allCoordinates = feature.geometry.coordinates.map((c: number[]) => ({ lat: c[1], lng: c[0] }));
