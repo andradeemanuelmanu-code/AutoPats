@@ -1,14 +1,16 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Phone, Mail } from "lucide-react";
 import { SalesOrderTable } from "@/components/vendas/SalesOrderTable";
 import NotFound from "./NotFound";
 import { useAppData } from "@/context/AppDataContext";
+import { showSuccess } from "@/utils/toast";
 
 const HistoricoCliente = () => {
   const { customerId } = useParams<{ customerId: string }>();
-  const { customers, salesOrders } = useAppData();
+  const { customers, salesOrders, cancelSalesOrder } = useAppData();
+  const navigate = useNavigate();
   
   const customer = customers.find(c => c.id === customerId);
   const customerOrders = salesOrders.filter(o => o.customerId === customerId);
@@ -16,6 +18,17 @@ const HistoricoCliente = () => {
   if (!customer) {
     return <NotFound />;
   }
+
+  const handleViewDetails = (orderId: string) => {
+    navigate(`/vendas/pedidos/${orderId}`);
+  };
+
+  const handleCancelOrder = (orderId: string) => {
+    if (window.confirm("Tem certeza que deseja cancelar este pedido? O estoque dos itens será revertido.")) {
+      cancelSalesOrder(orderId);
+      showSuccess("Pedido cancelado com sucesso!");
+    }
+  };
 
   return (
     <>
@@ -43,7 +56,11 @@ const HistoricoCliente = () => {
       </Card>
 
       <h2 className="text-md font-semibold md:text-xl text-foreground mb-4">Pedidos de Venda</h2>
-      <SalesOrderTable orders={customerOrders} />
+      <SalesOrderTable 
+        orders={customerOrders} 
+        onViewDetails={handleViewDetails}
+        onCancel={handleCancelOrder}
+      />
     </>
   );
 };
