@@ -5,11 +5,11 @@ import { ArrowLeft, MapPin, Phone, Mail } from "lucide-react";
 import { SalesOrderTable } from "@/components/vendas/SalesOrderTable";
 import NotFound from "./NotFound";
 import { useAppData } from "@/context/AppDataContext";
-import { showSuccess } from "@/utils/toast";
+import { SalesOrder } from "@/data/salesOrders";
 
 const HistoricoCliente = () => {
   const { customerId } = useParams<{ customerId: string }>();
-  const { customers, salesOrders, cancelSalesOrder } = useAppData();
+  const { customers, salesOrders, cancelSalesOrder, updateSalesOrderStatus } = useAppData();
   const navigate = useNavigate();
   
   const customer = customers.find(c => c.id === customerId);
@@ -24,9 +24,14 @@ const HistoricoCliente = () => {
   };
 
   const handleCancelOrder = (orderId: string) => {
-    if (window.confirm("Tem certeza que deseja cancelar este pedido? O estoque dos itens será revertido.")) {
+    if (window.confirm("Tem certeza que deseja cancelar este pedido? O estoque dos itens será revertido se o pedido já foi faturado.")) {
       cancelSalesOrder(orderId);
-      showSuccess("Pedido cancelado com sucesso!");
+    }
+  };
+
+  const handleStatusChange = (orderId: string, newStatus: SalesOrder['status']) => {
+    if (window.confirm(`Tem certeza que deseja alterar o status para "${newStatus}"? Isso pode afetar o estoque.`)) {
+      updateSalesOrderStatus(orderId, newStatus);
     }
   };
 
@@ -60,6 +65,7 @@ const HistoricoCliente = () => {
         orders={customerOrders} 
         onViewDetails={handleViewDetails}
         onCancel={handleCancelOrder}
+        onStatusChange={handleStatusChange}
       />
     </>
   );

@@ -24,6 +24,8 @@ export interface AppDataContextType {
   addPurchaseOrder: (order: Omit<PurchaseOrder, 'id' | 'number'>) => void;
   cancelSalesOrder: (orderId: string) => void;
   cancelPurchaseOrder: (orderId: string) => void;
+  updateSalesOrderStatus: (orderId: string, newStatus: SalesOrder['status']) => void;
+  updatePurchaseOrderStatus: (orderId: string, newStatus: PurchaseOrder['status']) => void;
   markNotificationsAsRead: () => void;
 }
 
@@ -95,65 +97,56 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const cancelSalesOrder = (orderId: string) => {
-    let orderToCancel: SalesOrder | undefined;
+  const updateSalesOrderStatus = (orderId: string, newStatus: SalesOrder['status']) => {
+    const order = salesOrders.find(o => o.id === orderId);
+    if (!order || order.status === newStatus) return;
 
-    setSalesOrders(prevOrders =>
-      prevOrders.map(order => {
-        if (order.id === orderId && order.status !== 'Cancelado') {
-          orderToCancel = { ...order, status: 'Cancelado' };
-          return orderToCancel;
-        }
-        return order;
-      })
-    );
+    const oldStatus = order.status;
 
-    if (orderToCancel) {
-      setProducts(prevProducts => {
-        const updatedProducts = [...prevProducts];
-        (orderToCancel as SalesOrder).items.forEach(item => {
-          const productIndex = updatedProducts.findIndex(p => p.id === item.productId);
-          if (productIndex !== -1) {
-            updatedProducts[productIndex].stock += item.quantity;
-          }
-        });
-        return updatedProducts;
+    // Adjust stock
+    if (oldStatus !== 'Faturado' && newStatus === 'Faturado') {
+      // Pendente/Cancelado -> Faturado: Decrease stock
+      order.items.forEach(item => {
+        setProducts(prev => prev.map(p => p.id === item.productId ? { ...p, stock: p.stock - item.quantity } : p));
       });
-      addNotification(`Pedido ${orderToCancel.number} foi cancelado.`, '/vendas/pedidos');
+    } else if (oldStatus === 'Faturado' && newStatus !== 'Faturado') {
+      // Faturado -> Pendente/Cancelado: Increase stock
+      order.items.forEach(item => {
+        setProducts(prev => prev.map(p => p.id === item.productId ? { ...p, stock: p.stock + item.quantity } : p));
+      });
     }
+
+    // Update order status
+    setSalesOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    addNotification(`Status do pedido ${order.number} atualizado para ${newStatus}.`, `/vendas/pedidos/${orderId}`);
   };
 
-  const cancelPurchaseOrder = (orderId: string) => {
-    let orderToCancel: PurchaseOrder | undefined;
-    let originalStatus: PurchaseOrder['status'] | undefined;
+  const updatePurchaseOrderStatus = (orderId: string, newStatus: PurchaseOrder['status']) => {
+    const order = purchaseOrders.find(o => o.id === orderId);
+    if (!order || order.status === newStatus) return;
 
-    setPurchaseOrders(prevOrders =>
-      prevOrders.map(order => {
-        if (order.id === orderId && order.status !== 'Cancelado') {
-          originalStatus = order.status;
-          orderToCancel = { ...order, status: 'Cancelado' };
-          return orderToCancel;
-        }
-        return order;
-      })
-    );
+    const oldStatus = order.status;
 
-    if (orderToCancel && originalStatus === 'Recebido') {
-      setProducts(prevProducts => {
-        const updatedProducts = [...prevProducts];
-        orderToCancel!.items.forEach(item => {
-          const productIndex = updatedProducts.findIndex(p => p.id === item.productId);
-          if (productIndex !== -1) {
-            updatedProducts[productIndex].stock -= item.quantity;
-          }
-        });
-        return updatedProducts;
+    // Adjust stock
+    if (oldStatus !== 'Recebido' && newStatus === 'Recebido') {
+      // Pendente/Cancelado -> Recebido: Increase stock
+      order.items.forEach(item => {
+        setProducts(prev => prev.map(p => p.id === item.productId ? { ...p, stock: p.stock + item.quantity } : p));
       });
-      addNotification(`Pedido de compra ${orderToCancel.number} cancelado. Estoque revertido.`, '/compras/pedidos');
-    } else if (orderToCancel) {
-      addNotification(`Pedido de compra ${orderToCancel.number} foi cancelado.`, '/compras/pedidos');
+    } else if (oldStatus === 'Recebido' && newStatus !== 'Recebido') {
+      // Recebido -> Pendente/Cancelado: Decrease stock
+      order.items.forEach(item => {
+        setProducts(prev => prev.map(p => p.id === item.productId ? { ...p, stock: p.stock - item.quantity } : p));
+      });
     }
+
+    // Update order status
+    setPurchaseOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    addNotification(`Status do pedido ${order.number} atualizado para ${newStatus}.`, `/compras/pedidos/${orderId}`);
   };
+
+  const cancelSalesOrder = (orderId: string) => updateSalesOrderStatus(orderId, 'Cancelado');
+  const cancelPurchaseOrder = (orderId: string) => updatePurchaseOrderStatus(orderId, 'Cancelado');
 
   const value = useMemo(() => ({
     products,
@@ -166,6 +159,8 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     addPurchaseOrder,
     cancelSalesOrder,
     cancelPurchaseOrder,
+    updateSalesOrderStatus,
+    updatePurchaseOrderStatus,
     markNotificationsAsRead,
   }), [products, salesOrders, customers, suppliers, purchaseOrders, notifications]);
 
