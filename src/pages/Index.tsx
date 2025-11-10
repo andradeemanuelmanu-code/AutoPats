@@ -30,28 +30,20 @@ const Index = () => {
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    // 1. Identificar todos os produtos com estoque baixo atualmente.
     const currentLowStockProducts = products.filter(p => p.stock <= p.minStock);
+    if (currentLowStockProducts.length === 0) return;
 
-    if (currentLowStockProducts.length === 0) {
-      return; // Se não há produtos com estoque baixo, não faz nada.
-    }
-
-    // 2. Recuperar os IDs dos produtos cujos alertas já foram exibidos nesta sessão.
     const shownAlertsRaw = sessionStorage.getItem('shownLowStockProductIds');
     const shownProductIds: string[] = shownAlertsRaw ? JSON.parse(shownAlertsRaw) : [];
 
-    // 3. Filtrar para encontrar apenas os produtos que são novos alertas.
     const newProductsToShow = currentLowStockProducts.filter(
       p => !shownProductIds.includes(p.id)
     );
 
-    // 4. Se houver novos produtos para alertar, mostrar o pop-up.
     if (newProductsToShow.length > 0) {
       setLowStockProducts(newProductsToShow);
       setIsLowStockAlertOpen(true);
 
-      // 5. Atualizar a lista de alertas exibidos na sessão.
       const newShownIds = newProductsToShow.map(p => p.id);
       const updatedShownIds = [...new Set([...shownProductIds, ...newShownIds])];
       sessionStorage.setItem('shownLowStockProductIds', JSON.stringify(updatedShownIds));
@@ -65,6 +57,14 @@ const Index = () => {
         return acc + order.items.reduce((itemAcc, item) => itemAcc + item.quantity, 0);
       }, 0);
   }, [salesOrders]);
+
+  const handleOpenLowStockAlert = () => {
+    const allLowStockProducts = products.filter(p => p.stock <= p.minStock);
+    if (allLowStockProducts.length > 0) {
+      setLowStockProducts(allLowStockProducts);
+      setIsLowStockAlertOpen(true);
+    }
+  };
 
   return (
     <>
@@ -96,7 +96,7 @@ const Index = () => {
           changeType="negative"
           Icon={Activity}
         />
-        <StockAlertsCard />
+        <StockAlertsCard onClick={handleOpenLowStockAlert} />
         <MarginChartCard />
       </div>
       <div className="grid gap-4 md:gap-8 lg:grid-cols-5">

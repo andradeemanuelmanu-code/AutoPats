@@ -8,9 +8,10 @@ interface DashboardCardProps {
   Icon: LucideIcon;
   children: React.ReactNode;
   linkTo?: string;
+  onClick?: () => void;
 }
 
-export const DashboardCard = ({ title, description, Icon, children, linkTo }: DashboardCardProps) => {
+export const DashboardCard = ({ title, description, Icon, children, linkTo, onClick }: DashboardCardProps) => {
   const content = (
     <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -28,6 +29,14 @@ export const DashboardCard = ({ title, description, Icon, children, linkTo }: Da
 
   if (linkTo) {
     return <Link to={linkTo} className="hover:opacity-90 transition-opacity">{content}</Link>;
+  }
+
+  if (onClick) {
+    return (
+      <div onClick={onClick} className="cursor-pointer hover:opacity-90 transition-opacity">
+        {content}
+      </div>
+    );
   }
 
   return content;
