@@ -1,7 +1,18 @@
-import { useState, useMemo } from "react";
-import { Activity } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Activity, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { StockAlertsCard } from "@/components/dashboard/StockAlertsCard";
 import { TopProductsCard } from "@/components/dashboard/TopProductsCard";
@@ -10,10 +21,21 @@ import { OrderStatusChart } from "@/components/dashboard/OrderStatusChart";
 import { StockMovementChart } from "@/components/dashboard/StockMovementChart";
 import { useAppData } from "@/context/AppDataContext";
 import { InventoryValueCard } from "@/components/relatorios/InventoryValueCard";
+import { Product } from "@/data/products";
 
 const Index = () => {
   const [period, setPeriod] = useState('month');
-  const { salesOrders } = useAppData();
+  const { salesOrders, products } = useAppData();
+  const [isLowStockAlertOpen, setIsLowStockAlertOpen] = useState(false);
+  const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const lowStock = products.filter(p => p.stock <= p.minStock);
+    if (lowStock.length > 0) {
+      setLowStockProducts(lowStock);
+      setIsLowStockAlertOpen(true);
+    }
+  }, [products]);
 
   const itemsSold = useMemo(() => {
     return salesOrders
@@ -79,6 +101,39 @@ const Index = () => {
           <StockMovementChart />
         </CardContent>
       </Card>
+
+      <AlertDialog open={isLowStockAlertOpen} onOpenChange={setIsLowStockAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
+              Alerta de Estoque Baixo!
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Os seguintes produtos atingiram o nível mínimo de estoque e precisam de atenção:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="max-h-60 overflow-y-auto pr-4">
+            <ul className="list-disc pl-5 space-y-2 text-sm">
+              {lowStockProducts.map(product => (
+                <li key={product.id}>
+                  <strong>{product.description}</strong>
+                  <br />
+                  <span className="text-muted-foreground">
+                    Estoque atual: {product.stock} (Mínimo: {product.minStock})
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Fechar</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Link to="/estoque">Ver Estoque</Link>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
