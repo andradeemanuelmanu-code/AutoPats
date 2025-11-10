@@ -11,11 +11,18 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useAppData } from "@/context/AppDataContext";
 import { TotalRevenueCard } from "@/components/relatorios/TotalRevenueCard";
+import { DatePickerWithRange } from "@/components/ui/date-picker-with-range";
+import { DateRange } from "react-day-picker";
+import { subDays } from "date-fns";
 
 const Relatorios = () => {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
   const appData = useAppData();
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
 
   const handleExportPDF = async () => {
     if (!pdfRef.current) return;
@@ -64,9 +71,7 @@ const Relatorios = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground">Relatórios Gerenciais</h1>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-          <Button variant="outline" className="w-full sm:w-auto">
-            Filtrar por Data
-          </Button>
+          <DatePickerWithRange date={date} setDate={setDate} />
           <Button onClick={handleExportPDF} disabled={isGeneratingPdf} className="w-full sm:w-auto">
             {isGeneratingPdf ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -78,24 +83,24 @@ const Relatorios = () => {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 mt-4">
-        <TotalRevenueCard />
+        <TotalRevenueCard dateRange={date} />
         <ReportCard
           title="Análise de Pareto de Produtos"
           description="Produtos que representam a maior parte do faturamento (Curva ABC)."
         >
-          <ProductParetoChart />
+          <ProductParetoChart dateRange={date} />
         </ReportCard>
         <ReportCard
           title="Top 5 Clientes por Faturamento"
           description="Clientes que mais geraram receita para a empresa."
         >
-          <TopCustomersChart />
+          <TopCustomersChart dateRange={date} />
         </ReportCard>
         <ReportCard
           title="Top 5 Fornecedores por Compras"
           description="Fornecedores com o maior volume de compras."
         >
-          <PurchasesBySupplierChart />
+          <PurchasesBySupplierChart dateRange={date} />
         </ReportCard>
       </div>
     </>
