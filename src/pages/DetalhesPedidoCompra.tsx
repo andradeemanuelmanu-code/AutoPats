@@ -77,8 +77,8 @@ const DetalhesPedidoCompra = () => {
           <CardHeader>
             <CardTitle>Itens do Pedido</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
+          <CardContent className="overflow-x-auto">
+            <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Produto</TableHead>

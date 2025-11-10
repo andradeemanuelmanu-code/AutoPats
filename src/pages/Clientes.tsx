@@ -57,20 +57,20 @@ const Clientes = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground">Clientes</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Buscar clientes..."
-              className="pl-8 sm:w-[300px]"
+              className="pl-8 w-full sm:w-auto md:w-[300px]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button onClick={() => handleOpenModal(null)}>
+          <Button onClick={() => handleOpenModal(null)} className="w-full sm:w-auto">
             <PlusCircle className="h-4 w-4 mr-2" />
             Novo Cliente
           </Button>

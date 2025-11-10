@@ -26,9 +26,9 @@ interface ProductTableProps {
 
 export const ProductTable = ({ products, onEdit, onDelete, onViewHistory }: ProductTableProps) => {
   return (
-    <div className="rounded-lg border shadow-sm bg-card">
+    <div className="bg-card">
       <Table>
-        <TableHeader>
+        <TableHeader className="hidden md:table-header-group">
           <TableRow>
             <TableHead>Código</TableHead>
             <TableHead>Descrição</TableHead>
@@ -38,21 +38,21 @@ export const ProductTable = ({ products, onEdit, onDelete, onViewHistory }: Prod
             <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="block md:table-row-group">
           {products.map((product) => (
-            <TableRow key={product.id}>
-              <TableCell className="font-medium">{product.code}</TableCell>
-              <TableCell>{product.description}</TableCell>
-              <TableCell>{product.category}</TableCell>
-              <TableCell>{product.brand}</TableCell>
-              <TableCell className="text-center">
+            <TableRow key={product.id} className="block md:table-row mb-4 md:mb-0 border md:border-0 rounded-lg shadow-md md:shadow-none">
+              <TableCell data-label="Código:" className="block md:table-cell text-right md:text-left p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none font-medium">{product.code}</TableCell>
+              <TableCell data-label="Descrição:" className="block md:table-cell text-right md:text-left p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none">{product.description}</TableCell>
+              <TableCell data-label="Categoria:" className="block md:table-cell text-right md:text-left p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none">{product.category}</TableCell>
+              <TableCell data-label="Marca:" className="block md:table-cell text-right md:text-left p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none">{product.brand}</TableCell>
+              <TableCell data-label="Estoque:" className="block md:table-cell text-right md:text-center p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none">
                 {product.stock <= product.minStock ? (
                   <Badge variant="destructive">{product.stock}</Badge>
                 ) : (
                   product.stock
                 )}
               </TableCell>
-              <TableCell className="text-center">
+              <TableCell className="block md:table-cell text-right md:text-center p-2 md:p-4">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">

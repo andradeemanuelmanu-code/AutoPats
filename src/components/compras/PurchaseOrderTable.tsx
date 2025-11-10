@@ -20,9 +20,9 @@ const statusStyles = {
 
 export const PurchaseOrderTable = ({ orders, onViewDetails, onCancel }: PurchaseOrderTableProps) => {
   return (
-    <div className="rounded-lg border shadow-sm bg-card">
+    <div className="bg-card">
       <Table>
-        <TableHeader>
+        <TableHeader className="hidden md:table-header-group">
           <TableRow>
             <TableHead>Número</TableHead>
             <TableHead>Fornecedor</TableHead>
@@ -32,19 +32,19 @@ export const PurchaseOrderTable = ({ orders, onViewDetails, onCancel }: Purchase
             <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="block md:table-row-group">
           {orders.map((order) => (
-            <TableRow key={order.id}>
-              <TableCell className="font-medium">{order.number}</TableCell>
-              <TableCell>{order.supplierName}</TableCell>
-              <TableCell>{new Date(order.date).toLocaleDateString('pt-BR')}</TableCell>
-              <TableCell className="text-center">
+            <TableRow key={order.id} className="block md:table-row mb-4 md:mb-0 border md:border-0 rounded-lg shadow-md md:shadow-none">
+              <TableCell data-label="Número:" className="block md:table-cell text-right md:text-left p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none font-medium">{order.number}</TableCell>
+              <TableCell data-label="Fornecedor:" className="block md:table-cell text-right md:text-left p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none">{order.supplierName}</TableCell>
+              <TableCell data-label="Data:" className="block md:table-cell text-right md:text-left p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none">{new Date(order.date).toLocaleDateString('pt-BR')}</TableCell>
+              <TableCell data-label="Status:" className="block md:table-cell text-right md:text-center p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none">
                 <Badge className={cn("text-white", statusStyles[order.status])}>{order.status}</Badge>
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell data-label="Valor Total:" className="block md:table-cell text-right md:text-right p-2 md:p-4 before:content-[attr(data-label)] before:float-left before:font-bold md:before:content-none">
                 {order.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </TableCell>
-              <TableCell className="text-center">
+              <TableCell className="block md:table-cell text-right md:text-center p-2 md:p-4">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>

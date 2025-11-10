@@ -61,13 +61,13 @@ const Relatorios = () => {
       <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
         <PdfDocument ref={pdfRef} data={appData} />
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground">Relatórios Gerenciais</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <Button variant="outline" className="w-full sm:w-auto">
             Filtrar por Data
           </Button>
-          <Button onClick={handleExportPDF} disabled={isGeneratingPdf}>
+          <Button onClick={handleExportPDF} disabled={isGeneratingPdf} className="w-full sm:w-auto">
             {isGeneratingPdf ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (

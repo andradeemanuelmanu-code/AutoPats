@@ -103,8 +103,8 @@ export const SalesOrderForm = ({ customers, products, onSubmit, onCancel }: Sale
         <Card>
           <CardHeader><CardTitle>Itens do Pedido</CardTitle></CardHeader>
           <CardContent>
-            <div className="flex items-end gap-2 mb-4">
-              <FormItem className="flex-1">
+            <div className="flex flex-wrap items-end gap-2 mb-4">
+              <FormItem className="flex-1 min-w-[150px]">
                 <FormLabel>Produto</FormLabel>
                 <Select value={currentItem.productId} onValueChange={val => setCurrentItem(prev => ({ ...prev, productId: val }))}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione um produto" /></SelectTrigger></FormControl>
@@ -113,17 +113,17 @@ export const SalesOrderForm = ({ customers, products, onSubmit, onCancel }: Sale
                   </SelectContent>
                 </Select>
               </FormItem>
-              <FormItem>
+              <FormItem className="w-full sm:w-auto">
                 <FormLabel>Quantidade</FormLabel>
-                <Input type="number" value={currentItem.quantity} onChange={e => setCurrentItem(prev => ({ ...prev, quantity: e.target.value }))} className="w-24" />
+                <Input type="number" value={currentItem.quantity} onChange={e => setCurrentItem(prev => ({ ...prev, quantity: e.target.value }))} className="w-full sm:w-24" />
               </FormItem>
-              <FormItem>
+              <FormItem className="w-full sm:w-auto">
                 <FormLabel>Preço Unit.</FormLabel>
-                <Input type="number" placeholder="R$ 0,00" value={currentItem.unitPrice} onChange={e => setCurrentItem(prev => ({ ...prev, unitPrice: e.target.value }))} className="w-28" />
+                <Input type="number" placeholder="R$ 0,00" value={currentItem.unitPrice} onChange={e => setCurrentItem(prev => ({ ...prev, unitPrice: e.target.value }))} className="w-full sm:w-28" />
               </FormItem>
-              <Button type="button" onClick={handleAddItem}><PlusCircle className="h-4 w-4 mr-2" /> Adicionar</Button>
+              <Button type="button" onClick={handleAddItem} className="w-full sm:w-auto"><PlusCircle className="h-4 w-4 mr-2" /> Adicionar</Button>
             </div>
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

@@ -40,7 +40,7 @@ export const SupplierForm = ({ supplier, onSubmit }: SupplierFormProps) => {
   return (
     <Form {...form}>
       <form id="supplier-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField control={form.control} name="name" render={({ field }) => (
             <FormItem><FormLabel>Nome</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
           )} />
@@ -48,7 +48,7 @@ export const SupplierForm = ({ supplier, onSubmit }: SupplierFormProps) => {
             <FormItem><FormLabel>CNPJ</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
           )} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField control={form.control} name="email" render={({ field }) => (
             <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
@@ -59,7 +59,7 @@ export const SupplierForm = ({ supplier, onSubmit }: SupplierFormProps) => {
         <FormField control={form.control} name="address" render={({ field }) => (
           <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
         )} />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField control={form.control} name="lat" render={({ field }) => (
             <FormItem><FormLabel>Latitude</FormLabel><FormControl><Input type="number" step="any" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
