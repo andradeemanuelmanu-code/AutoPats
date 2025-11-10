@@ -30,15 +30,10 @@ const Index = () => {
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    const alertShown = sessionStorage.getItem('lowStockAlertShown');
-
-    if (!alertShown) {
-      const lowStock = products.filter(p => p.stock <= p.minStock);
-      if (lowStock.length > 0) {
-        setLowStockProducts(lowStock);
-        setIsLowStockAlertOpen(true);
-        sessionStorage.setItem('lowStockAlertShown', 'true');
-      }
+    const lowStock = products.filter(p => p.stock <= p.minStock);
+    if (lowStock.length > 0) {
+      setLowStockProducts(lowStock);
+      setIsLowStockAlertOpen(true);
     }
   }, [products]);
 
