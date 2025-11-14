@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { OrderStatusDialog } from "@/components/OrderStatusDialog";
+import { OrderStatusDialog } from "@/components/shared/OrderStatusDialog";
 import { showSuccess } from "@/utils/toast";
 import { SalesOrder } from "@/data/salesOrders";
 
