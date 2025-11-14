@@ -43,15 +43,16 @@ export const PurchaseOrderDetailModal = ({ order, isOpen, onOpenChange }: Purcha
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-3xl max-w-[95vw] h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-4xl h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Detalhes do Pedido de Compra</DialogTitle>
             <DialogDescription>Pedido #{order.number}</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="md:col-span-3 lg:col-span-3">
-                <CardHeader className="flex flex-row items-center justify-between">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 py-4 flex-1 overflow-y-auto pr-2">
+            {/* Main content area */}
+            <div className="lg:col-span-2 space-y-4">
+              <Card>
+                <CardHeader className="flex flex-row items-start justify-between">
                   <div>
                     <CardTitle className="text-base">Informações Gerais</CardTitle>
                     <p className="text-sm text-muted-foreground">Fornecedor: {order.supplierName}</p>
@@ -72,13 +73,14 @@ export const PurchaseOrderDetailModal = ({ order, isOpen, onOpenChange }: Purcha
                 </CardContent>
               </Card>
 
-              <Card className="md:col-span-3 lg:col-span-3">
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Itens do Pedido</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table className="min-w-[600px]">
+                  {/* Desktop Table */}
+                  <div className="overflow-x-auto hidden md:block">
+                    <Table>
                       <TableHeader>
                         <TableRow>
                           <TableHead>Produto</TableHead>
@@ -99,15 +101,38 @@ export const PurchaseOrderDetailModal = ({ order, isOpen, onOpenChange }: Purcha
                       </TableBody>
                     </Table>
                   </div>
+                  {/* Mobile Card List */}
+                  <div className="space-y-3 md:hidden">
+                    {order.items.map((item, index) => (
+                      <div key={index} className="p-3 border rounded-md">
+                        <p className="font-semibold text-sm">{item.productName}</p>
+                        <div className="flex justify-between text-xs mt-2 pt-2 border-t">
+                          <span className="text-muted-foreground">Qtd:</span>
+                          <span>{item.quantity}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">Custo Unit.:</span>
+                          <span>{item.unitPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-medium mt-1 pt-1 border-t">
+                          <span className="text-muted-foreground">Subtotal:</span>
+                          <span>{(item.quantity * item.unitPrice).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
+            </div>
 
-              <Card className="md:col-span-2 lg:col-span-2">
+            {/* Sidebar area */}
+            <div className="lg:col-span-1">
+              <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">Resumo Financeiro</CardTitle>
                 </CardHeader>
                 <CardContent className="text-right">
-                  <p className="text-xl font-bold">
+                  <p className="text-2xl font-bold">
                     {order.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </p>
                   <p className="text-xs text-muted-foreground">Valor Total do Pedido</p>
