@@ -1,18 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  ClipboardList,
-  Map,
-  BarChart3,
-  Settings,
-  Wrench,
-  Users,
-  Truck,
-  Sparkles,
-  Route, // Importando o novo ícone
-} from "lucide-react";
+import { Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Accordion,
@@ -20,33 +7,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { navigationConfig } from "@/config/navigation";
 
-const mainNavItems = [
-  { to: "/", label: "Dashboard", Icon: LayoutDashboard },
-  { to: "/estoque", label: "Estoque", Icon: Package },
-  {
-    label: "Vendas",
-    Icon: ShoppingCart,
-    subItems: [
-      { to: "/vendas/clientes", label: "Clientes", Icon: Users },
-      { to: "/vendas/pedidos", label: "Pedidos de Venda", Icon: ClipboardList },
-    ],
-  },
-  {
-    label: "Compras",
-    Icon: ClipboardList,
-    subItems: [
-      { to: "/compras/fornecedores", label: "Fornecedores", Icon: Users },
-      { to: "/compras/pedidos", label: "Pedidos de Compra", Icon: Truck },
-    ],
-  },
-  { to: "/mapa", label: "Mapa Interativo", Icon: Map },
-  { to: "/otimizacao-rotas", label: "Otimização de Rotas", Icon: Route }, // Novo item
-  { to: "/relatorios", label: "Relatórios", Icon: BarChart3 },
-  { to: "/ia-insights", label: "IA Insights", Icon: Sparkles },
-];
-
-const footerNavItem = { to: "/configuracoes", label: "Configurações", Icon: Settings };
+const mainNavItems = navigationConfig.filter(item => item.type === 'main');
+const footerNavItem = navigationConfig.find(item => item.type === 'footer');
 
 const NavItem = ({ to, label, Icon }) => (
   <NavLink
@@ -101,9 +65,11 @@ export const Sidebar = () => {
               )
             )}
           </nav>
-          <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            <NavItem key={footerNavItem.label} {...footerNavItem} />
-          </nav>
+          {footerNavItem && footerNavItem.to && (
+            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+              <NavItem key={footerNavItem.label} {...footerNavItem} />
+            </nav>
+          )}
         </div>
       </div>
     </div>

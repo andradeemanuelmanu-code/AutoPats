@@ -1,8 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import {
-  Menu, Wrench, Bell, CircleUser, LayoutDashboard, Package, ShoppingCart,
-  ClipboardList, Map, BarChart3, Settings, Users, Truck, Sparkles, Route
-} from "lucide-react";
+import { Menu, Wrench, Bell, CircleUser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,32 +18,7 @@ import {
 } from "@/components/ui/accordion";
 import { useAppData } from "@/context/AppDataContext";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { to: "/", label: "Dashboard", Icon: LayoutDashboard },
-  { to: "/estoque", label: "Estoque", Icon: Package },
-  {
-    label: "Vendas",
-    Icon: ShoppingCart,
-    subItems: [
-      { to: "/vendas/clientes", label: "Clientes", Icon: Users },
-      { to: "/vendas/pedidos", label: "Pedidos de Venda", Icon: ClipboardList },
-    ],
-  },
-  {
-    label: "Compras",
-    Icon: ClipboardList,
-    subItems: [
-      { to: "/compras/fornecedores", label: "Fornecedores", Icon: Users },
-      { to: "/compras/pedidos", label: "Pedidos de Compra", Icon: Truck },
-    ],
-  },
-  { to: "/mapa", label: "Mapa Interativo", Icon: Map },
-  { to: "/otimizacao-rotas", label: "Otimização de Rotas", Icon: Route },
-  { to: "/relatorios", label: "Relatórios", Icon: BarChart3 },
-  { to: "/ia-insights", label: "IA Insights", Icon: Sparkles },
-  { to: "/configuracoes", label: "Configurações", Icon: Settings },
-];
+import { navigationConfig } from "@/config/navigation";
 
 const MobileNavLink = ({ to, children }: { to: string, children: React.ReactNode }) => (
   <NavLink
@@ -85,7 +57,7 @@ export const Header = () => {
           </div>
           <nav className="flex-1 overflow-y-auto p-4">
             <div className="grid gap-2 text-base font-medium">
-              {navItems.map((item) =>
+              {navigationConfig.map((item) =>
                 item.subItems ? (
                   <Accordion key={item.label} type="single" collapsible defaultValue={item.subItems.some(p => location.pathname.startsWith(p.to)) ? item.label : ""}>
                     <AccordionItem value={item.label} className="border-b-0">
