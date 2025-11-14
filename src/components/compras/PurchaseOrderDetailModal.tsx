@@ -1,8 +1,19 @@
-import { OrderDetailModalBase } from "@/components/shared/OrderDetailModalBase";
-import { OrderStatusSection } from "@/components/shared/OrderStatusSection";
-import { OrderItemsTable } from "@/components/shared/OrderItemsTable";
-import { OrderSummarySection } from "@/components/shared/OrderSummarySection";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { OrderStatusDialog } from "@/components/OrderStatusDialog";
+import { showSuccess } from "@/utils/toast";
 import { PurchaseOrder } from "@/data/purchaseOrders";
 import { useAppData } from "@/context/AppDataContext";
 
@@ -20,46 +31,101 @@ const statusStyles = {
 
 export const PurchaseOrderDetailModal = ({ order, isOpen, onOpenChange }: PurchaseOrderDetailModalProps) => {
   const { updatePurchaseOrderStatus } = useAppData();
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
   if (!order) return null;
 
-  const handleStatusChange = (newStatus: string) => {
+  const handleStatusSave = (newStatus: string) => {
     updatePurchaseOrderStatus(order.id, newStatus as PurchaseOrder['status']);
+    showSuccess("Status do pedido atualizado com sucesso!");
   };
 
-  const items = order.items.map(item => ({
-    productName: item.productName,
-    quantity: item.quantity,
-    unitPrice: item.unitPrice,
-    subtotal: item.quantity * item.unitPrice,
-  }));
-
   return (
-    <OrderDetailModalBase
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      orderNumber={order.number}
-      orderDate={order.date}
-      supplierName={order.supplierName}
-      status={order.status}
-      statusStyles={statusStyles}
-      items={items}
-      totalValue={order.totalValue}
-      availableStatuses={["Pendente", "Recebido", "Cancelado"]}
-      onStatusChange={handleStatusChange}
-    >
-      <div className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        <OrderStatusSection
-          orderNumber={order.number}
-          orderDate={order.date}
-          supplierName={order.supplierName}
-          status={order.status}
-          statusStyles={statusStyles}
-          onEditStatus={() => {}}
-        />
-        <OrderItemsTable items={items} />
-        <OrderSummarySection totalValue={order.totalValue} />
-      </div>
-    </OrderDetailModalBase>
+    <>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-3xl max-w-[95vw] h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Pedido de Compra</DialogTitle>
+            <DialogDescription>Pedido #{order.number}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Card className="md:col-span-3 lg:col-span-3">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="text-base">Informações Gerais</CardTitle>
+                    <p className="text-sm text-muted-foreground">Fornecedor: {order.supplierName}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Data do Pedido</p>
+                    <p className="text-sm">{new Date(order.date).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Status:</span>
+                    <Badge className={cn("text-white", statusStyles[order.status])}>{order.status}</Badge>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsStatusModalOpen(true)}>
+                      <Pencil className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="md:col-span-3 lg:col-span-3">
+                <CardHeader>
+                  <CardTitle className="text-base">Itens do Pedido</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table className="min-w-[600px]">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Produto</TableHead>
+                          <TableHead className="text-center">Qtd.</TableHead>
+                          <TableHead className="text-right">Custo Unit.</TableHead>
+                          <TableHead className="text-right">Subtotal</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {order.items.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="text-sm">{item.productName}</TableCell>
+                            <TableCell className="text-center text-sm">{item.quantity}</TableCell>
+                            <TableCell className="text-right text-sm">{item.unitPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
+                            <TableCell className="text-right text-sm">{(item.quantity * item.unitPrice).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="md:col-span-2 lg:col-span-2">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Resumo Financeiro</CardTitle>
+                </CardHeader>
+                <CardContent className="text-right">
+                  <p className="text-xl font-bold">
+                    {order.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Valor Total do Pedido</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      <OrderStatusDialog
+        isOpen={isStatusModalOpen}
+        onOpenChange={setIsStatusModalOpen}
+        currentStatus={order.status}
+        availableStatuses={["Pendente", "Recebido", "Cancelado"]}
+        onSave={handleStatusSave}
+        orderNumber={order.number}
+      />
+    </>
   );
 };
