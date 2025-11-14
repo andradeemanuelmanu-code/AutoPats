@@ -70,7 +70,7 @@ const Relatorios = () => {
   return (
     <>
       <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
-        <PdfDocument ref={pdfRef} data={appData} />
+        <PdfDocument ref={pdfRef} data={appData} dateRange={date} />
       </div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground">Relatórios Gerenciais</h1>

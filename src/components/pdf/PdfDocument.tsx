@@ -1,35 +1,43 @@
 import React from 'react';
+import { format } from 'date-fns';
+import { DateRange } from 'react-day-picker';
 import { AppDataContext, AppDataContextType } from '@/context/AppDataContext';
-import { KpiCard } from "@/components/dashboard/KpiCard";
-import { StockAlertsCard } from "@/components/dashboard/StockAlertsCard";
-import { TopProductsCard } from "@/components/dashboard/TopProductsCard";
-import { MarginChartCard } from "@/components/dashboard/MarginChartCard";
-import { OrderStatusChart } from "@/components/dashboard/OrderStatusChart";
-import { StockMovementChart } from "@/components/dashboard/StockMovementChart";
-import { InventoryValueCard } from "@/components/relatorios/InventoryValueCard";
+import { Wrench } from "lucide-react";
+import { ReportCard } from "@/components/relatorios/ReportCard";
+import { TotalRevenueCard } from "@/components/relatorios/TotalRevenueCard";
+import { StockValueCard } from "@/components/relatorios/StockValueCard";
+import { ProfitabilityByProductTable } from "@/components/relatorios/ProfitabilityByProductTable";
+import { IdleStockTable } from "@/components/relatorios/IdleStockTable";
+import { SalesByCategoryChart } from "@/components/relatorios/SalesByCategoryChart";
 import { ProductParetoChart } from "@/components/relatorios/ProductParetoChart";
 import { TopCustomersChart } from "@/components/relatorios/TopCustomersChart";
 import { PurchasesBySupplierChart } from "@/components/relatorios/PurchasesBySupplierChart";
-import { DollarSign, Activity, Wrench } from "lucide-react";
 
-const PdfHeader = () => (
-  <header className="flex items-center justify-between pb-4 border-b mb-6">
-    <div className="flex items-center gap-3 font-semibold">
-      <Wrench className="h-8 w-8 text-primary" />
-      <span className="text-2xl">Relatório Geral - Autoparts</span>
-    </div>
-    <div className="text-right text-sm">
-      <p>Gerado em:</p>
-      <p>{new Date().toLocaleString('pt-BR')}</p>
-    </div>
-  </header>
-);
+const PdfHeader = ({ dateRange }: { dateRange?: DateRange }) => {
+  const formattedDateRange = dateRange?.from
+    ? `${format(dateRange.from, 'dd/MM/yyyy')} - ${dateRange.to ? format(dateRange.to, 'dd/MM/yyyy') : ''}`
+    : 'Período Completo';
+
+  return (
+    <header className="flex items-center justify-between pb-4 border-b mb-6">
+      <div className="flex items-center gap-3 font-semibold">
+        <Wrench className="h-8 w-8 text-primary" />
+        <span className="text-2xl">Relatório Gerencial - Autoparts</span>
+      </div>
+      <div className="text-right text-sm">
+        <p><strong>Período:</strong> {formattedDateRange}</p>
+        <p><strong>Gerado em:</strong> {new Date().toLocaleString('pt-BR')}</p>
+      </div>
+    </header>
+  );
+};
 
 interface PdfDocumentProps {
   data: AppDataContextType;
+  dateRange?: DateRange;
 }
 
-export const PdfDocument = React.forwardRef<HTMLDivElement, PdfDocumentProps>(({ data }, ref) => {
+export const PdfDocument = React.forwardRef<HTMLDivElement, PdfDocumentProps>(({ data, dateRange }, ref) => {
   return (
     <AppDataContext.Provider value={data}>
       <div
@@ -44,56 +52,58 @@ export const PdfDocument = React.forwardRef<HTMLDivElement, PdfDocumentProps>(({
         }}
       >
         {/* Página 1 */}
-        <div className="pdf-page p-8" style={{ height: '297mm' }}>
-          <PdfHeader />
-          <main>
-            <section className="p-4 border rounded-lg">
-              <h2 className="text-xl font-semibold mb-4">Visão Geral do Dashboard</h2>
-              <div className="grid grid-cols-4 gap-4">
-                <KpiCard title="Faturamento Total" value="R$ 45.231,89" change="+20.1% do último mês" changeType="positive" Icon={DollarSign} />
-                <KpiCard title="Giro de Estoque" value="573" change="-2.4% da última hora" changeType="negative" Icon={Activity} />
-                <StockAlertsCard />
-                <MarginChartCard pdfMode={true} value="42.5%" change="+2.1% do último mês" />
-              </div>
-              <div className="grid grid-cols-2 gap-6 mt-6">
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-center">Status dos Pedidos de Venda</h3>
-                  <OrderStatusChart pdfMode={true} salesOrders={data.salesOrders} />
-                </div>
-                <div>
-                  <TopProductsCard salesOrders={data.salesOrders} />
-                </div>
-              </div>
-              <div className="mt-6 space-y-2">
-                <h3 className="font-semibold text-center">Movimentação de Estoque</h3>
-                <StockMovementChart pdfMode={true} salesOrders={data.salesOrders} purchaseOrders={data.purchaseOrders} />
-              </div>
-            </section>
+        <div className="pdf-page p-8" style={{ height: '297mm', display: 'flex', flexDirection: 'column' }}>
+          <PdfHeader dateRange={dateRange} />
+          <main className="flex-1">
+            <div className="grid grid-cols-2 gap-4">
+              <TotalRevenueCard dateRange={dateRange} />
+              <StockValueCard />
+              <ReportCard
+                title="Análise de Lucratividade por Produto"
+                description="Lucro bruto e margem para cada produto vendido."
+              >
+                <ProfitabilityByProductTable dateRange={dateRange} />
+              </ReportCard>
+              <ReportCard
+                title="Produtos sem Giro no Período"
+                description="Itens em estoque que não tiveram vendas."
+              >
+                <IdleStockTable dateRange={dateRange} />
+              </ReportCard>
+            </div>
           </main>
         </div>
 
         {/* Página 2 */}
-        <div className="pdf-page p-8" style={{ height: '297mm' }}>
-          <PdfHeader />
-          <main>
-            <section className="p-4 border rounded-lg">
-              <h2 className="text-xl font-semibold mb-4">Relatórios Gerenciais</h2>
-              <div className="grid grid-cols-1 gap-6">
-                <InventoryValueCard />
-                <div className="space-y-2">
-                    <h3 className="font-semibold text-center">Análise de Pareto de Produtos</h3>
-                    <ProductParetoChart pdfMode={true} />
-                </div>
-                <div className="space-y-2">
-                    <h3 className="font-semibold text-center">Top 5 Clientes por Faturamento</h3>
-                    <TopCustomersChart pdfMode={true} />
-                </div>
-                <div className="space-y-2">
-                    <h3 className="font-semibold text-center">Top 5 Fornecedores por Compras</h3>
-                    <PurchasesBySupplierChart pdfMode={true} />
-                </div>
-              </div>
-            </section>
+        <div className="pdf-page p-8" style={{ height: '297mm', display: 'flex', flexDirection: 'column' }}>
+          <PdfHeader dateRange={dateRange} />
+          <main className="flex-1">
+            <div className="grid grid-cols-2 gap-4">
+              <ReportCard
+                title="Vendas por Categoria"
+                description="Faturamento total agrupado por categoria."
+              >
+                <SalesByCategoryChart pdfMode={true} dateRange={dateRange} />
+              </ReportCard>
+              <ReportCard
+                title="Análise de Pareto de Produtos"
+                description="Produtos que representam a maior parte do faturamento."
+              >
+                <ProductParetoChart pdfMode={true} dateRange={dateRange} />
+              </ReportCard>
+              <ReportCard
+                title="Top 5 Clientes por Faturamento"
+                description="Clientes que mais geraram receita."
+              >
+                <TopCustomersChart pdfMode={true} dateRange={dateRange} />
+              </ReportCard>
+              <ReportCard
+                title="Top 5 Fornecedores por Compras"
+                description="Fornecedores com o maior volume de compras."
+              >
+                <PurchasesBySupplierChart pdfMode={true} dateRange={dateRange} />
+              </ReportCard>
+            </div>
           </main>
         </div>
       </div>
