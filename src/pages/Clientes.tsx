@@ -8,12 +8,20 @@ import { mockCustomers, Customer } from "@/data/customers";
 import { CustomerCard } from "@/components/vendas/CustomerCard";
 import { CustomerForm } from "@/components/vendas/CustomerForm";
 import { showSuccess, showError } from "@/utils/toast";
+import { useAppData } from "@/context/AppDataContext";
+import { CustomerHistoryModal } from "@/components/vendas/CustomerHistoryModal";
+import { SalesOrder } from "@/data/salesOrders";
 
 const Clientes = () => {
+  const { salesOrders } = useAppData();
   const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [customerOrders, setCustomerOrders] = useState<SalesOrder[]>([]);
 
   const filteredCustomers = useMemo(() => {
     if (!searchTerm) return customers;
@@ -55,6 +63,13 @@ const Clientes = () => {
     }
   };
 
+  const handleViewHistory = (customer: Customer) => {
+    const orders = salesOrders.filter(o => o.customerId === customer.id);
+    setSelectedCustomer(customer);
+    setCustomerOrders(orders);
+    setIsHistoryModalOpen(true);
+  };
+
   return (
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -79,7 +94,13 @@ const Clientes = () => {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredCustomers.map(customer => (
-          <CustomerCard key={customer.id} customer={customer} onEdit={handleOpenModal} onDelete={handleDeleteCustomer} />
+          <CustomerCard 
+            key={customer.id} 
+            customer={customer} 
+            onEdit={handleOpenModal} 
+            onDelete={handleDeleteCustomer}
+            onViewHistory={handleViewHistory}
+          />
         ))}
       </div>
 
@@ -97,6 +118,13 @@ const Clientes = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CustomerHistoryModal
+        isOpen={isHistoryModalOpen}
+        onOpenChange={setIsHistoryModalOpen}
+        customer={selectedCustomer}
+        orders={customerOrders}
+      />
     </>
   );
 };

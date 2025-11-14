@@ -15,12 +15,10 @@ import Relatorios from "./pages/Relatorios";
 import IAInsights from "./pages/IAInsights";
 import Configuracoes from "./pages/Configuracoes";
 import { Layout } from "./components/Layout";
-import HistoricoCliente from "./pages/HistoricoCliente";
 import { AppDataProvider } from "./context/AppDataContext";
 import DetalhesPedidoVenda from "./pages/DetalhesPedidoVenda";
 import DetalhesPedidoCompra from "./pages/DetalhesPedidoCompra";
-import HistoricoProduto from "./pages/HistoricoProduto";
-import OtimizacaoRotas from "./pages/OtimizacaoRotas"; // Importando a nova página
+import OtimizacaoRotas from "./pages/OtimizacaoRotas";
 
 const queryClient = new QueryClient();
 
@@ -35,16 +33,14 @@ const App = () => (
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/estoque" element={<Estoque />} />
-              <Route path="/estoque/:productId" element={<HistoricoProduto />} />
               <Route path="/compras/fornecedores" element={<Fornecedores />} />
               <Route path="/compras/pedidos" element={<PedidosCompra />} />
               <Route path="/compras/pedidos/:orderId" element={<DetalhesPedidoCompra />} />
               <Route path="/vendas/clientes" element={<Clientes />} />
-              <Route path="/vendas/clientes/:customerId" element={<HistoricoCliente />} />
               <Route path="/vendas/pedidos" element={<PedidosVenda />} />
               <Route path="/vendas/pedidos/:orderId" element={<DetalhesPedidoVenda />} />
               <Route path="/mapa" element={<Mapa />} />
-              <Route path="/otimizacao-rotas" element={<OtimizacaoRotas />} /> {/* Nova rota */}
+              <Route path="/otimizacao-rotas" element={<OtimizacaoRotas />} />
               <Route path="/relatorios" element={<Relatorios />} />
               <Route path="/ia-insights" element={<IAInsights />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
