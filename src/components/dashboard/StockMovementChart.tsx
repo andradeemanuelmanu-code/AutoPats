@@ -1,9 +1,15 @@
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { useMemo } from 'react';
-import { useAppData } from '@/context/AppDataContext';
+import { SalesOrder } from '@/data/salesOrders';
+import { PurchaseOrder } from '@/data/purchaseOrders';
 
-export const StockMovementChart = ({ pdfMode = false }: { pdfMode?: boolean }) => {
-  const { salesOrders, purchaseOrders } = useAppData();
+interface StockMovementChartProps {
+  pdfMode?: boolean;
+  salesOrders: SalesOrder[];
+  purchaseOrders: PurchaseOrder[];
+}
+
+export const StockMovementChart = ({ pdfMode = false, salesOrders, purchaseOrders }: StockMovementChartProps) => {
   const chartData = useMemo(() => {
     const movements: { [date: string]: { entradas: number; saidas: number } } = {};
 
@@ -25,6 +31,14 @@ export const StockMovementChart = ({ pdfMode = false }: { pdfMode?: boolean }) =
       Saídas: movements[date].saidas,
     })).sort((a, b) => new Date(a.date.split('/').reverse().join('-')).getTime() - new Date(b.date.split('/').reverse().join('-')).getTime());
   }, [salesOrders, purchaseOrders]);
+
+  if (chartData.length === 0) {
+    return (
+      <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+        Nenhuma movimentação de estoque no período.
+      </div>
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={300}>

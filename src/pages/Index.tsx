@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Activity, AlertTriangle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Activity, AlertTriangle, DollarSign } from "lucide-react";
+import { startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -20,14 +21,23 @@ import { MarginChartCard } from "@/components/dashboard/MarginChartCard";
 import { OrderStatusChart } from "@/components/dashboard/OrderStatusChart";
 import { StockMovementChart } from "@/components/dashboard/StockMovementChart";
 import { useAppData } from "@/context/AppDataContext";
-import { InventoryValueCard } from "@/components/relatorios/InventoryValueCard";
 import { Product } from "@/data/products";
+import { SalesOrder } from "@/data/salesOrders";
+
+const calculatePercentageChange = (current: number, previous: number) => {
+  if (previous === 0) {
+    return current > 0 ? "+100%" : "0%";
+  }
+  const change = ((current - previous) / previous) * 100;
+  return `${change > 0 ? '+' : ''}${change.toFixed(1)}%`;
+};
 
 const Index = () => {
   const [period, setPeriod] = useState('month');
-  const { salesOrders, products } = useAppData();
+  const { salesOrders, purchaseOrders, products } = useAppData();
   const [isLowStockAlertOpen, setIsLowStockAlertOpen] = useState(false);
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const currentLowStockProducts = products.filter(p => p.stock <= p.minStock);
@@ -50,13 +60,76 @@ const Index = () => {
     }
   }, [products]);
 
-  const itemsSold = useMemo(() => {
-    return salesOrders
-      .filter(order => order.status === 'Faturado')
-      .reduce((acc, order) => {
-        return acc + order.items.reduce((itemAcc, item) => itemAcc + item.quantity, 0);
-      }, 0);
-  }, [salesOrders]);
+  const { currentRange, previousRange } = useMemo(() => {
+    const now = new Date();
+    if (period === 'month') {
+      return {
+        currentRange: { start: startOfMonth(now), end: endOfMonth(now) },
+        previousRange: { start: startOfMonth(subMonths(now, 1)), end: endOfMonth(subMonths(now, 1)) }
+      };
+    }
+    return {
+      currentRange: { start: startOfYear(now), end: endOfYear(now) },
+      previousRange: { start: startOfYear(subYears(now, 1)), end: endOfYear(subYears(now, 1)) }
+    };
+  }, [period]);
+
+  const filteredSalesOrders = useMemo(() => {
+    return salesOrders.filter(order => {
+      const orderDate = new Date(order.date);
+      return orderDate >= currentRange.start && orderDate <= currentRange.end;
+    });
+  }, [salesOrders, currentRange]);
+
+  const filteredPurchaseOrders = useMemo(() => {
+    return purchaseOrders.filter(order => {
+      const orderDate = new Date(order.date);
+      return orderDate >= currentRange.start && orderDate <= currentRange.end;
+    });
+  }, [purchaseOrders, currentRange]);
+
+  const { revenueKpi, soldItemsKpi, marginKpi } = useMemo(() => {
+    const periodLabel = period === 'month' ? 'do último mês' : 'do último ano';
+
+    const getMetrics = (orders: SalesOrder[]) => {
+      const faturadoOrders = orders.filter(o => o.status === 'Faturado');
+      const revenue = faturadoOrders.reduce((sum, o) => sum + o.totalValue, 0);
+      const itemsSold = faturadoOrders.reduce((sum, o) => sum + o.items.reduce((itemSum, i) => itemSum + i.quantity, 0), 0);
+      return { revenue, itemsSold };
+    };
+
+    const previousSalesOrders = salesOrders.filter(order => {
+      const orderDate = new Date(order.date);
+      return orderDate >= previousRange.start && orderDate <= previousRange.end;
+    });
+
+    const currentMetrics = getMetrics(filteredSalesOrders);
+    const previousMetrics = getMetrics(previousSalesOrders);
+
+    const revenueChange = calculatePercentageChange(currentMetrics.revenue, previousMetrics.revenue);
+    const itemsSoldChange = calculatePercentageChange(currentMetrics.itemsSold, previousMetrics.itemsSold);
+
+    return {
+      revenueKpi: {
+        title: "Faturamento Total",
+        value: currentMetrics.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+        change: `${revenueChange} ${periodLabel}`,
+        changeType: (currentMetrics.revenue >= previousMetrics.revenue ? "positive" : "negative") as "positive" | "negative",
+        Icon: DollarSign,
+      },
+      soldItemsKpi: {
+        title: "Itens Vendidos",
+        value: currentMetrics.itemsSold.toString(),
+        change: `${itemsSoldChange} ${periodLabel}`,
+        changeType: (currentMetrics.itemsSold >= previousMetrics.itemsSold ? "positive" : "negative") as "positive" | "negative",
+        Icon: Activity,
+      },
+      marginKpi: { // Simplificado por enquanto
+        value: "42.5%",
+        change: `+2.1% ${periodLabel}`,
+      }
+    };
+  }, [filteredSalesOrders, salesOrders, previousRange, period]);
 
   const handleOpenLowStockAlert = () => {
     const allLowStockProducts = products.filter(p => p.stock <= p.minStock);
@@ -64,6 +137,10 @@ const Index = () => {
       setLowStockProducts(allLowStockProducts);
       setIsLowStockAlertOpen(true);
     }
+  };
+
+  const handleOrderStatusClick = (status: string) => {
+    navigate(`/vendas/pedidos?status=${status}`);
   };
 
   return (
@@ -88,38 +165,32 @@ const Index = () => {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        <InventoryValueCard />
-        <KpiCard
-          title="Itens Vendidos"
-          value={itemsSold.toString()}
-          change="-2.4% da última hora"
-          changeType="negative"
-          Icon={Activity}
-        />
+        <KpiCard {...revenueKpi} />
+        <KpiCard {...soldItemsKpi} />
         <StockAlertsCard onClick={handleOpenLowStockAlert} />
-        <MarginChartCard />
+        <MarginChartCard value={marginKpi.value} change={marginKpi.change} />
       </div>
       <div className="grid gap-4 md:gap-8 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Status dos Pedidos de Venda</CardTitle>
-            <CardDescription>Distribuição dos pedidos por status este mês.</CardDescription>
+            <CardDescription>Distribuição dos pedidos por status no período.</CardDescription>
           </CardHeader>
           <CardContent>
-            <OrderStatusChart />
+            <OrderStatusChart salesOrders={filteredSalesOrders} onStatusClick={handleOrderStatusClick} />
           </CardContent>
         </Card>
         <div className="lg:col-span-2">
-          <TopProductsCard />
+          <TopProductsCard salesOrders={filteredSalesOrders} />
         </div>
       </div>
       <Card>
         <CardHeader>
           <CardTitle>Movimentação de Estoque</CardTitle>
-          <CardDescription>Entradas e saídas de unidades de produtos.</CardDescription>
+          <CardDescription>Entradas e saídas de unidades de produtos no período.</CardDescription>
         </CardHeader>
         <CardContent>
-          <StockMovementChart />
+          <StockMovementChart salesOrders={filteredSalesOrders} purchaseOrders={filteredPurchaseOrders} />
         </CardContent>
       </Card>
 
@@ -138,7 +209,9 @@ const Index = () => {
             <ul className="list-disc pl-5 space-y-2 text-sm">
               {lowStockProducts.map(product => (
                 <li key={product.id}>
-                  <strong>{product.description}</strong>
+                  <Link to={`/estoque/${product.id}`} className="font-semibold hover:underline" onClick={() => setIsLowStockAlertOpen(false)}>
+                    {product.description}
+                  </Link>
                   <br />
                   <span className="text-muted-foreground">
                     Estoque atual: {product.stock} (Mínimo: {product.minStock})

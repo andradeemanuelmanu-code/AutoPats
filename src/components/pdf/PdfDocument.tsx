@@ -53,20 +53,20 @@ export const PdfDocument = React.forwardRef<HTMLDivElement, PdfDocumentProps>(({
                 <KpiCard title="Faturamento Total" value="R$ 45.231,89" change="+20.1% do último mês" changeType="positive" Icon={DollarSign} />
                 <KpiCard title="Giro de Estoque" value="573" change="-2.4% da última hora" changeType="negative" Icon={Activity} />
                 <StockAlertsCard />
-                <MarginChartCard pdfMode={true} />
+                <MarginChartCard pdfMode={true} value="42.5%" change="+2.1% do último mês" />
               </div>
               <div className="grid grid-cols-2 gap-6 mt-6">
                 <div className="space-y-2">
                   <h3 className="font-semibold text-center">Status dos Pedidos de Venda</h3>
-                  <OrderStatusChart pdfMode={true} />
+                  <OrderStatusChart pdfMode={true} salesOrders={data.salesOrders} />
                 </div>
                 <div>
-                  <TopProductsCard />
+                  <TopProductsCard salesOrders={data.salesOrders} />
                 </div>
               </div>
               <div className="mt-6 space-y-2">
                 <h3 className="font-semibold text-center">Movimentação de Estoque</h3>
-                <StockMovementChart pdfMode={true} />
+                <StockMovementChart pdfMode={true} salesOrders={data.salesOrders} purchaseOrders={data.purchaseOrders} />
               </div>
             </section>
           </main>

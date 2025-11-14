@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
@@ -21,15 +22,21 @@ const PedidosVenda = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<SalesOrder | null>(null);
+  const [searchParams] = useSearchParams();
+  const statusFilter = searchParams.get('status');
 
   const filteredOrders = useMemo(() => {
-    if (!searchTerm) return salesOrders;
-    const lowercasedTerm = searchTerm.toLowerCase();
-    return salesOrders.filter(order =>
-      order.number.toLowerCase().includes(lowercasedTerm) ||
-      order.customerName.toLowerCase().includes(lowercasedTerm)
-    );
-  }, [salesOrders, searchTerm]);
+    return salesOrders.filter(order => {
+      const lowercasedTerm = searchTerm.toLowerCase();
+      const matchesSearch = !searchTerm ||
+        order.number.toLowerCase().includes(lowercasedTerm) ||
+        order.customerName.toLowerCase().includes(lowercasedTerm);
+      
+      const matchesStatus = !statusFilter || order.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [salesOrders, searchTerm, statusFilter]);
 
   const handleViewDetails = (orderId: string) => {
     const order = salesOrders.find(o => o.id === orderId);
@@ -74,7 +81,10 @@ const PedidosVenda = () => {
   return (
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-lg font-semibold md:text-2xl text-foreground">Pedidos de Venda</h1>
+        <div>
+          <h1 className="text-lg font-semibold md:text-2xl text-foreground">Pedidos de Venda</h1>
+          {statusFilter && <p className="text-sm text-muted-foreground">Filtrando por status: {statusFilter}</p>}
+        </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
